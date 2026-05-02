@@ -1,0 +1,22 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python / Backend
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Dependencias
+node_modules/
+
+# Logs
+*.log

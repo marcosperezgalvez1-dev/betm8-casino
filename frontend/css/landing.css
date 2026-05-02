@@ -1,0 +1,472 @@
+/* ========================================
+   LANDING PAGE - BetM8 Casino Online
+   Paleta: Negro, Verde #0a5c36, Dorado #d4af37, Rojo #c41e3a
+   ======================================== */
+
+/* ===== RESET Y ESTILOS GLOBALES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #0d0d0d;
+    color: #f0f0f0;
+    line-height: 1.6;
+}
+
+/* Tipografia de titulos */
+h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Titulo de cada seccion */
+.seccion-titulo {
+    text-align: center;
+    font-size: 2.2rem;
+    color: #d4af37;
+    margin-bottom: 50px;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(13, 13, 13, 0.95);
+    border-bottom: 1px solid #1a1a1a;
+    z-index: 1000;
+    padding: 15px 0;
+    transition: background-color 0.3s;
+}
+
+.navbar-contenedor {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.8rem;
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.navbar-enlaces {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar-link {
+    color: #f0f0f0;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.navbar-link:hover {
+    color: #d4af37;
+}
+
+/* Boton "Iniciar Sesion" en el navbar */
+.btn-iniciar-sesion {
+    background-color: #c41e3a;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-iniciar-sesion:hover {
+    background-color: #a01830;
+    transform: translateY(-2px);
+}
+
+/* Boton hamburguesa (oculto en escritorio) */
+.navbar-hamburguesa {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.navbar-hamburguesa span {
+    display: block;
+    width: 28px;
+    height: 3px;
+    background-color: #d4af37;
+    border-radius: 2px;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ===== HERO ===== */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a0a1e 50%, #0d0d0d 100%);
+    overflow: hidden;
+    padding: 100px 20px 60px;
+}
+
+/* Elementos decorativos flotantes */
+.hero-decoracion {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.hero-decoracion span {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.1;
+    animation: flotar 6s ease-in-out infinite;
+}
+
+.deco-1 { top: 15%; left: 10%; animation-delay: 0s; }
+.deco-2 { top: 25%; right: 12%; animation-delay: 1s; }
+.deco-3 { bottom: 20%; left: 15%; animation-delay: 2s; }
+.deco-4 { bottom: 30%; right: 10%; animation-delay: 3s; }
+.deco-5 { top: 50%; left: 5%; animation-delay: 1.5s; }
+.deco-6 { top: 40%; right: 5%; animation-delay: 2.5s; }
+
+/* Animacion de flotacion para los elementos decorativos */
+@keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.hero-contenido {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-titulo {
+    font-size: 5rem;
+    color: #d4af37;
+    margin-bottom: 20px;
+    text-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+    letter-spacing: 4px;
+}
+
+.hero-tagline {
+    font-size: 1.4rem;
+    color: #ccc;
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+/* Boton principal CTA */
+.btn-cta {
+    display: inline-block;
+    background-color: #c41e3a;
+    color: #fff;
+    padding: 16px 48px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
+}
+
+.btn-cta:hover {
+    background-color: #a01830;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(196, 30, 58, 0.6);
+}
+
+/* ===== COMO FUNCIONA ===== */
+.como-funciona {
+    padding: 100px 20px;
+    background-color: #111;
+}
+
+.pasos-contenedor {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.paso-tarjeta {
+    flex: 1;
+    max-width: 320px;
+    background-color: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 40px 30px;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.paso-tarjeta:hover {
+    transform: translateY(-8px);
+    border-color: #d4af37;
+}
+
+.paso-icono {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.paso-titulo {
+    color: #d4af37;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+}
+
+.paso-descripcion {
+    color: #bbb;
+    font-size: 0.95rem;
+}
+
+/* ===== NUESTROS JUEGOS ===== */
+.juegos {
+    padding: 100px 20px;
+    background-color: #0d0d0d;
+}
+
+.juegos-contenedor {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.juego-card {
+    background: linear-gradient(145deg, #1a1a1a, #111);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.juego-card:hover {
+    transform: translateY(-8px);
+    border-color: #0a5c36;
+    box-shadow: 0 8px 30px rgba(10, 92, 54, 0.3);
+}
+
+.juego-icono {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 18px;
+}
+
+.juego-nombre {
+    color: #d4af37;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.juego-descripcion {
+    color: #bbb;
+    font-size: 0.9rem;
+}
+
+/* ===== SALAS PRIVADAS ===== */
+.salas-privadas {
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #0a5c36 0%, #073d24 100%);
+    text-align: center;
+}
+
+.salas-contenido {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.salas-privadas .seccion-titulo {
+    color: #fff;
+}
+
+.salas-texto {
+    font-size: 1.15rem;
+    color: #ddd;
+    margin-bottom: 40px;
+    line-height: 1.8;
+}
+
+.salas-caracteristicas {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.salas-item {
+    background-color: rgba(0, 0, 0, 0.25);
+    padding: 18px 20px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.salas-item:hover {
+    transform: translateY(-4px);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background-color: #080808;
+    padding: 50px 20px 30px;
+    text-align: center;
+    border-top: 1px solid #1a1a1a;
+}
+
+.footer-contenedor {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    color: #d4af37;
+    margin-bottom: 20px;
+}
+
+.footer-enlaces {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.footer-enlaces a {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.footer-enlaces a:hover {
+    color: #d4af37;
+}
+
+.footer-disclaimer {
+    color: #0a5c36;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.footer-copyright {
+    color: #555;
+    font-size: 0.85rem;
+}
+
+/* ===== RESPONSIVE - TABLET ===== */
+@media (max-width: 900px) {
+    .juegos-contenedor {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hero-titulo {
+        font-size: 3.5rem;
+    }
+}
+
+/* ===== RESPONSIVE - MOVIL ===== */
+@media (max-width: 600px) {
+    /* Navbar movil */
+    .navbar-hamburguesa {
+        display: flex;
+    }
+
+    .navbar-enlaces {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: rgba(13, 13, 13, 0.98);
+        flex-direction: column;
+        padding: 20px;
+        gap: 15px;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    /* Clase que muestra el menu en movil */
+    .navbar-enlaces.activo {
+        display: flex;
+    }
+
+    /* Hero mas pequeno en movil */
+    .hero-titulo {
+        font-size: 2.8rem;
+    }
+
+    .hero-tagline {
+        font-size: 1.1rem;
+    }
+
+    .btn-cta {
+        padding: 14px 36px;
+        font-size: 1rem;
+    }
+
+    /* Pasos en columna en movil */
+    .pasos-contenedor {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .paso-tarjeta {
+        max-width: 100%;
+    }
+
+    /* Juegos en una columna en movil */
+    .juegos-contenedor {
+        grid-template-columns: 1fr;
+    }
+
+    /* Salas en una columna en movil */
+    .salas-caracteristicas {
+        grid-template-columns: 1fr;
+    }
+
+    /* Footer enlaces en columna */
+    .footer-enlaces {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .seccion-titulo {
+        font-size: 1.8rem;
+    }
+}
