@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetM8 — Casino Social Online</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    /* ---- HERO ---- */
+    .hero {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 80px 0;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 40%, rgba(212,168,67,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 10% 80%, rgba(0,207,255,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168,85,247,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(42,42,58,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,42,58,0.3) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 650px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212,168,67,0.1);
+      border: 1px solid rgba(212,168,67,0.25);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .line-gold {
+      color: var(--gold);
+      display: block;
+      text-shadow: 0 0 40px rgba(212,168,67,0.3);
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 520px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat { display: flex; flex-direction: column; gap: 2px; }
+    .hero-stat-value {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .hero-stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .hero-visual {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 480px;
+      pointer-events: none;
+    }
+
+    .floating-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      position: absolute;
+      animation: float 4s ease-in-out infinite;
+      box-shadow: var(--shadow-card);
+    }
+
+    .floating-card.c1 { top: -60px; right: 20px; width: 200px; animation-delay: 0s; }
+    .floating-card.c2 { top: 80px; right: 180px; width: 180px; animation-delay: 1.5s; border-color: var(--gold-dark); }
+    .floating-card.c3 { top: 220px; right: 40px; width: 210px; animation-delay: 0.8s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .section { padding: 80px 0; }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      margin-bottom: 12px;
+    }
+    .section-subtitle { color: var(--text-secondary); font-size: 1rem; max-width: 500px; margin: 0 auto; }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .game-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      display: block;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      border-color: var(--gold-dark);
+    }
+
+    .game-thumb {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-thumb-bj   { background: linear-gradient(135deg, #0d2218 0%, #0a3320 100%); }
+    .game-thumb-rl   { background: linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 100%); }
+    .game-thumb-pk   { background: linear-gradient(135deg, #0a0d2a 0%, #0f1540 100%); }
+    .game-thumb-sl   { background: linear-gradient(135deg, #1a0d2a 0%, #2a1040 100%); }
+    .game-thumb-bc   { background: linear-gradient(135deg, #1a1a0a 0%, #2d2a0f 100%); }
+    .game-thumb-cr   { background: linear-gradient(135deg, #0a1a1a 0%, #0f2a2a 100%); }
+
+    .game-thumb-glow {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .game-card:hover .game-thumb-glow { opacity: 1; }
+
+    .game-info { padding: 18px 20px; }
+    .game-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .game-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
+    .game-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .step-card {
+      text-align: center;
+      padding: 32px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .step-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      border: 1px solid var(--gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin: 0 auto 16px;
+    }
+
+    .step-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .step-card p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+
+    .cta-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 64px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin: 80px 0;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(212,168,67,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 12px;
+    }
+
+    .cta-section p { color: var(--text-secondary); margin-bottom: 32px; font-size: 1.05rem; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+
+    @media (max-width: 1100px) {
+      .hero-visual { display: none; }
+      .hero-content { max-width: 100%; }
+    }
+    @media (max-width: 900px) {
+      .cta-section { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-eyebrow">◈ Dinero 100% simulado · Sin riesgo real</div>
+        <h1>
+          El casino social
+          <span class="line-gold">para jugar con amigos</span>
+        </h1>
+        <p class="hero-desc">
+          Crea salas privadas o únete a partidas públicas. Juega al Blackjack, Ruleta, Poker, Tragaperras, Baccarat y Dados — todo con fichas virtuales y la emoción de un casino real.
+        </p>
+        <div class="hero-cta">
+          <a href="register.html" class="btn btn-primary btn-lg">Empezar gratis</a>
+          <a href="lobby.html" class="btn btn-ghost btn-lg">Ver salas</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">6</span>
+            <span class="hero-stat-label">Juegos</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">◈ 5.000</span>
+            <span class="hero-stat-label">Fichas de inicio</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">∞</span>
+            <span class="hero-stat-label">Salas posibles</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">0€</span>
+            <span class="hero-stat-label">Dinero real</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="floating-card c1">
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">Sala activa</div>
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:6px">Blackjack VIP</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge badge-green">En juego</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)">3/6 jugadores</span>
+        </div>
+      </div>
+      <div class="floating-card c2">
+        <div style="font-size:2rem;margin-bottom:6px">🃏</div>
+        <div style="font-family:var(--font-display);font-size:0.95rem;font-weight:700">CasinoKing</div>
+        <div style="font-size:0.8rem;color:var(--gold);margin-top:4px">◈ 12.450</div>
+      </div>
+      <div class="floating-card c3">
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em">Último resultado</div>
+        <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--neon-green);font-weight:700">+◈ 2.500</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">Ruleta · número 17</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background: var(--bg-surface);">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Juegos disponibles</div>
+        <h2 class="section-title">6 juegos de casino</h2>
+        <p class="section-subtitle">Desde clásicos como el Blackjack hasta los Dados — todos jugables en salas con amigos</p>
+      </div>
+      <div class="games-grid">
+        <a href="blackjack.html" class="game-card">
+          <div class="game-thumb game-thumb-bj"><span>🃏</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,255,157,0.1),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Blackjack</div><div class="game-desc">Planta o pide carta. Llega a 21 sin pasarte y supera al crupier.</div><div class="game-meta"><span class="badge badge-green">Fácil</span><span class="badge badge-gold">Clásico</span></div></div>
+        </a>
+        <a href="ruleta.html" class="game-card">
+          <div class="game-thumb game-thumb-rl"><span>🎡</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(255,68,102,0.1),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Ruleta</div><div class="game-desc">Apuesta a números, colores o grupos. La bola decide tu fortuna.</div><div class="game-meta"><span class="badge badge-red">Alta tensión</span><span class="badge badge-gold">Clásico</span></div></div>
+        </a>
+        <a href="poker.html" class="game-card">
+          <div class="game-thumb game-thumb-pk"><span>♠️</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,207,255,0.1),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Poker Texas Hold'em</div><div class="game-desc">Estrategia, faroleo y cartas comunitarias. El juego más social.</div><div class="game-meta"><span class="badge badge-blue">Estrategia</span><span class="badge badge-purple">Multijugador</span></div></div>
+        </a>
+        <a href="slots.html" class="game-card">
+          <div class="game-thumb game-thumb-sl"><span>🎰</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(168,85,247,0.1),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Tragaperras</div><div class="game-desc">Gira los rodillos y cruza los dedos. El jackpot te espera.</div><div class="game-meta"><span class="badge badge-purple">Suerte pura</span><span class="badge badge-gold">Jackpot</span></div></div>
+        </a>
+        <a href="baccarat.html" class="game-card">
+          <div class="game-thumb game-thumb-bc"><span>🎴</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(212,168,67,0.1),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Baccarat</div><div class="game-desc">Apuesta al Jugador, la Banca o Empate. Elegancia y sencillez.</div><div class="game-meta"><span class="badge badge-gold">VIP</span><span class="badge badge-green">Rápido</span></div></div>
+        </a>
+        <a href="dados.html" class="game-card">
+          <div class="game-thumb game-thumb-cr"><span>🎲</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,207,255,0.12),transparent)"></div></div>
+          <div class="game-info"><div class="game-title">Dados (Craps)</div><div class="game-desc">Lanza los dados y apuesta al resultado. Adrenalina pura.</div><div class="game-meta"><span class="badge badge-blue">Acción</span><span class="badge badge-red">Apuestas múltiples</span></div></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Proceso</div>
+        <h2 class="section-title">¿Cómo funciona?</h2>
+        <p class="section-subtitle">En 4 pasos ya estás jugando con tus amigos</p>
+      </div>
+      <div class="steps-row">
+        <div class="step-card"><div class="step-num">1</div><h3>Regístrate gratis</h3><p>Crea tu cuenta en segundos y recibe <strong style="color:var(--gold)">◈ 5.000 fichas</strong> de inicio sin coste alguno.</p></div>
+        <div class="step-card"><div class="step-num">2</div><h3>Crea o únete a una sala</h3><p>Abre una sala pública o privada con código. Elige el juego, el límite de jugadores y las fichas iniciales.</p></div>
+        <div class="step-card"><div class="step-num">3</div><h3>El anfitrión gestiona</h3><p>El líder controla el inicio, pausa o finalización de la partida y puede repartir fichas entre jugadores.</p></div>
+        <div class="step-card"><div class="step-num">4</div><h3>¡A jugar!</h3><p>Compite, chatea con amigos y escala el ranking de la sala. Todo con fichas virtuales, cero riesgo real.</p></div>
+      </div>
+      <div style="text-align:center;margin-top:32px">
+        <a href="como-funciona.html" class="btn btn-outline">Ver guía completa</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="cta-section">
+      <h2>¿Listo para jugar?</h2>
+      <p>Únete gratis y pon a prueba tu suerte con tus amigos</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="register.html" class="btn btn-primary btn-lg">Crear cuenta gratis</a>
+        <a href="lobby.html" class="btn btn-ghost btn-lg">Explorar salas</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <footer>
+      <div class="footer-brand">BetM8</div>
+      <div>© 2026 BetM8 · TFG Marcos · Solo dinero simulado</div>
+      <div style="display:flex;gap:16px">
+        <a href="como-funciona.html" style="color:var(--text-muted);text-decoration:none">Cómo funciona</a>
+        <a href="lobby.html" style="color:var(--text-muted);text-decoration:none">Salas</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
