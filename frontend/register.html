@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrarse — BetM8</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    .auth-page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 80% 50%, rgba(212,168,67,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 20% 50%, rgba(168,85,247,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .auth-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 900px;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .auth-form-panel {
+      padding: 44px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-form-panel h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 28px; }
+
+    .form-stack { display: flex; flex-direction: column; gap: 16px; }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 0.9rem; pointer-events: none;
+    }
+    .input-icon-wrap .form-control { padding-left: 36px; }
+
+    .password-strength {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+      width: 0;
+    }
+
+    .strength-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .terms-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .terms-check input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .auth-switch {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 18px;
+    }
+    .auth-switch a { color: var(--gold); text-decoration: none; font-weight: 600; }
+    .auth-switch a:hover { text-decoration: underline; }
+
+    .auth-bonus {
+      background: linear-gradient(160deg, #0a1428 0%, #130d1f 50%, #0d1f14 100%);
+      padding: 48px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-bonus::before {
+      content: '';
+      position: absolute;
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(212,168,67,0.1), transparent 70%);
+      top: -80px; left: -60px;
+      border-radius: 50%;
+    }
+
+    .bonus-brand {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 28px;
+      text-shadow: 0 0 30px rgba(212,168,67,0.4);
+    }
+    .bonus-brand span { color: var(--text-primary); }
+
+    .bonus-card {
+      background: rgba(212,168,67,0.08);
+      border: 1px solid rgba(212,168,67,0.2);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .bonus-amount {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(212,168,67,0.4);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .bonus-label { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .bonus-features { display: flex; flex-direction: column; gap: 10px; }
+
+    .bonus-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .bonus-feature::before {
+      content: '✓';
+      color: var(--neon-green);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 680px) {
+      .auth-wrap { grid-template-columns: 1fr; }
+      .auth-bonus { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <main class="auth-page">
+    <div class="auth-bg"></div>
+    <div class="auth-wrap">
+
+      <div class="auth-form-panel">
+        <h1>Crear cuenta</h1>
+        <p class="auth-subtitle">Regístrate gratis y recibe tus fichas de bienvenida</p>
+
+        <form class="form-stack" id="register-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Nombre de usuario</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">👤</span>
+              <input type="text" class="form-control" id="reg-username"
+                placeholder="CasinoKing99" required minlength="3" maxlength="20"
+                autocomplete="username" oninput="checkUsername(this.value)">
+            </div>
+            <div id="username-feedback" style="font-size:0.75rem;margin-top:4px;display:none"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">✉</span>
+              <input type="email" class="form-control" id="reg-email"
+                placeholder="tu@email.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-control" id="reg-pass"
+                placeholder="Mínimo 6 caracteres" required minlength="6"
+                autocomplete="new-password" oninput="checkStrength(this.value)">
+            </div>
+            <div class="password-strength">
+              <div class="password-strength-bar" id="strength-bar"></div>
+            </div>
+            <div class="strength-label" id="strength-label">—</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-control" id="reg-pass2"
+                placeholder="Repite tu contraseña" required autocomplete="new-password">
+            </div>
+          </div>
+
+          <label class="terms-check">
+            <input type="checkbox" id="reg-terms" required>
+            <span>Acepto que esto es un juego de <strong>dinero simulado</strong> sin valor real y confirmo que tengo más de 18 años.</span>
+          </label>
+
+          <div id="reg-error" style="color:var(--neon-red);font-size:0.85rem;display:none;padding:10px 12px;background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.2);border-radius:var(--radius-sm)"></div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="reg-btn">
+            Crear cuenta y recibir fichas
+          </button>
+        </form>
+
+        <p class="auth-switch">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+      </div>
+
+      <div class="auth-bonus">
+        <div class="bonus-brand">Bet<span>M8</span></div>
+        <div class="bonus-card">
+          <div class="bonus-amount">◈ 5.000</div>
+          <div class="bonus-label">fichas de bienvenida gratis</div>
+        </div>
+        <div class="bonus-features">
+          <div class="bonus-feature">Sin depósito ni tarjeta</div>
+          <div class="bonus-feature">6 juegos de casino disponibles</div>
+          <div class="bonus-feature">Salas privadas con amigos</div>
+          <div class="bonus-feature">Chat en tiempo real</div>
+          <div class="bonus-feature">Ranking por sala</div>
+          <div class="bonus-feature">El anfitrión reparte fichas</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    if (BetM8.getUser()) window.location.href = 'lobby.html';
+
+    function checkUsername(val) {
+      const fb = document.getElementById('username-feedback');
+      if (val.length < 3) { fb.style.display = 'none'; return; }
+      const ok = /^[a-zA-Z0-9_]+$/.test(val);
+      fb.style.display = 'block';
+      if (!ok) {
+        fb.style.color = 'var(--neon-red)';
+        fb.textContent = 'Solo letras, números y guiones bajos';
+      } else {
+        fb.style.color = 'var(--neon-green)';
+        fb.textContent = '✓ Nombre de usuario válido';
+      }
+    }
+
+    function checkStrength(pass) {
+      const bar = document.getElementById('strength-bar');
+      const label = document.getElementById('strength-label');
+      let score = 0;
+      if (pass.length >= 6) score++;
+      if (pass.length >= 10) score++;
+      if (/[A-Z]/.test(pass)) score++;
+      if (/[0-9]/.test(pass)) score++;
+      if (/[^a-zA-Z0-9]/.test(pass)) score++;
+      const pct = (score / 5) * 100;
+      bar.style.width = pct + '%';
+      if (score <= 1) { bar.style.background = 'var(--neon-red)'; label.textContent = 'Muy débil'; }
+      else if (score <= 2) { bar.style.background = 'var(--warning)'; label.textContent = 'Débil'; }
+      else if (score <= 3) { bar.style.background = 'var(--gold)'; label.textContent = 'Media'; }
+      else if (score <= 4) { bar.style.background = 'var(--neon-green)'; label.textContent = 'Fuerte'; }
+      else { bar.style.background = 'var(--neon-blue)'; label.textContent = 'Muy fuerte'; }
+      label.style.color = bar.style.background;
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const pass2 = document.getElementById('reg-pass2').value;
+      const errEl = document.getElementById('reg-error');
+      const btn = document.getElementById('reg-btn');
+
+      errEl.style.display = 'none';
+
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        errEl.textContent = 'El nombre de usuario solo puede tener letras, números y guiones bajos';
+        errEl.style.display = 'block'; return;
+      }
+
+      if (pass !== pass2) {
+        errEl.textContent = 'Las contraseñas no coinciden';
+        errEl.style.display = 'block'; return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta...';
+
+      setTimeout(() => {
+        const result = BetM8.registerUser({ username, email, password: pass });
+        if (result.ok) {
+          BetM8.setUser(result.user);
+          BetM8.toast('¡Cuenta creada! Bienvenido, ' + username + ' 🎉', 'success', 4000);
+          setTimeout(() => window.location.href = 'lobby.html', 800);
+        } else {
+          errEl.textContent = result.msg;
+          errEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Crear cuenta y recibir fichas';
+        }
+      }, 700);
+    }
+  </script>
+</body>
+</html>

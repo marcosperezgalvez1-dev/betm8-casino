@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión — BetM8</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    .auth-page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 20% 50%, rgba(212,168,67,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 50%, rgba(0,207,255,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .auth-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 900px;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .auth-promo {
+      background: linear-gradient(160deg, #0d1f14 0%, #0a1428 50%, #130d1f 100%);
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-promo::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(212,168,67,0.12), transparent 70%);
+      bottom: -80px; right: -80px;
+      border-radius: 50%;
+    }
+
+    .auth-promo-brand {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 32px;
+      text-shadow: 0 0 30px rgba(212,168,67,0.4);
+    }
+
+    .auth-promo-brand span { color: var(--text-primary); }
+
+    .auth-promo h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .auth-promo p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-bottom: 32px; }
+
+    .promo-perks { display: flex; flex-direction: column; gap: 12px; }
+
+    .promo-perk {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .promo-perk-icon {
+      width: 32px; height: 32px;
+      background: rgba(212,168,67,0.1);
+      border: 1px solid rgba(212,168,67,0.2);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .auth-form-panel {
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-form-panel h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; }
+
+    .form-stack { display: flex; flex-direction: column; gap: 18px; }
+
+    .input-icon-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute;
+      left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .input-icon-wrap .form-control { padding-left: 36px; }
+
+    .forgot-link {
+      text-align: right;
+      font-size: 0.82rem;
+      color: var(--gold);
+      text-decoration: none;
+      display: block;
+      margin-top: -10px;
+    }
+
+    .forgot-link:hover { text-decoration: underline; }
+
+    .auth-switch {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 20px;
+    }
+
+    .auth-switch a { color: var(--gold); text-decoration: none; font-weight: 600; }
+    .auth-switch a:hover { text-decoration: underline; }
+
+    .demo-box {
+      background: rgba(212,168,67,0.06);
+      border: 1px solid rgba(212,168,67,0.2);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 16px;
+    }
+
+    .demo-box strong { color: var(--gold); }
+
+    @media (max-width: 680px) {
+      .auth-wrap { grid-template-columns: 1fr; }
+      .auth-promo { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <main class="auth-page">
+    <div class="auth-bg"></div>
+    <div class="auth-wrap">
+      <div class="auth-promo">
+        <div class="auth-promo-brand">Bet<span>M8</span></div>
+        <h2>Bienvenido de vuelta</h2>
+        <p>El casino social donde puedes jugar con amigos sin arriesgar dinero real.</p>
+        <div class="promo-perks">
+          <div class="promo-perk">
+            <div class="promo-perk-icon">◈</div>
+            <span><strong style="color:var(--text-primary)">5.000 fichas</strong> al registrarse</span>
+          </div>
+          <div class="promo-perk">
+            <div class="promo-perk-icon">🏠</div>
+            <span>Crea salas privadas para tus amigos</span>
+          </div>
+          <div class="promo-perk">
+            <div class="promo-perk-icon">🎮</div>
+            <span>6 juegos de casino disponibles</span>
+          </div>
+          <div class="promo-perk">
+            <div class="promo-perk-icon">💬</div>
+            <span>Chat en tiempo real en cada sala</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-form-panel">
+        <h1>Iniciar sesión</h1>
+        <p class="auth-subtitle">Introduce tus credenciales para continuar</p>
+
+        <form class="form-stack" id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Usuario o email</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">👤</span>
+              <input type="text" class="form-control" id="login-user" placeholder="tu_usuario o email@ejemplo.com" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-control" id="login-pass" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <div id="login-error" style="color:var(--neon-red);font-size:0.85rem;display:none;padding:10px 12px;background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.2);border-radius:var(--radius-sm)"></div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-btn">
+            Entrar al casino
+          </button>
+        </form>
+
+        <div class="demo-box">
+          <strong>Demo rápida:</strong> Regístrate con cualquier usuario/contraseña nueva, o prueba <strong>demo / demo123</strong>
+        </div>
+
+        <p class="auth-switch">
+          ¿No tienes cuenta? <a href="register.html">Regístrate gratis</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    if (BetM8.getUser()) window.location.href = 'lobby.html';
+
+    (function() {
+      const users = BetM8.getUsers();
+      if (!users.find(u => u.username === 'demo')) {
+        BetM8.registerUser({ username: 'demo', email: 'demo@betm8.com', password: 'demo123' });
+      }
+    })();
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('login-user').value.trim();
+      const passVal = document.getElementById('login-pass').value;
+      const errEl = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+
+      btn.disabled = true;
+      btn.textContent = 'Verificando...';
+      errEl.style.display = 'none';
+
+      setTimeout(() => {
+        const result = BetM8.loginUser(userVal, passVal);
+        if (result.ok) {
+          BetM8.toast('¡Bienvenido, ' + result.user.username + '!', 'success');
+          setTimeout(() => window.location.href = 'lobby.html', 600);
+        } else {
+          errEl.textContent = result.msg;
+          errEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Entrar al casino';
+        }
+      }, 600);
+    }
+  </script>
+</body>
+</html>
