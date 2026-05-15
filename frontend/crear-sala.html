@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear sala — BetM8</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .create-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 28px;
+      padding: 40px 0 60px;
+      align-items: start;
+    }
+
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .form-section-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-section-title .step-badge {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      border: 1px solid var(--gold-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .game-option {
+      cursor: pointer;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 10px;
+      text-align: center;
+      transition: all 0.2s;
+      background: var(--bg-surface);
+    }
+    .game-option:hover { border-color: var(--border-light); background: var(--bg-card-hover); }
+    .game-option.selected {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+    }
+    .game-option input { display: none; }
+    .game-option-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .game-option-label { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; }
+
+    .type-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .type-option {
+      cursor: pointer;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 12px;
+      text-align: center;
+      transition: all 0.2s;
+      background: var(--bg-surface);
+    }
+    .type-option:hover { border-color: var(--border-light); }
+    .type-option.selected { border-color: var(--gold); background: var(--gold-glow); }
+    .type-option input { display: none; }
+    .type-option-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .type-option-label { font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; }
+    .type-option-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
+
+    .coins-slider-wrap { margin-top: 8px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--bg-base);
+      box-shadow: 0 0 8px rgba(212,168,67,0.4);
+      cursor: pointer;
+    }
+    .coins-display {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin: 8px 0;
+    }
+    .coins-display::before { content: '◈ '; }
+
+    .economy-modes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .econ-mode {
+      cursor: pointer;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: all 0.2s;
+      background: var(--bg-surface);
+    }
+    .econ-mode:hover { border-color: var(--border-light); }
+    .econ-mode.selected { border-color: var(--gold); background: var(--gold-glow); }
+    .econ-mode input { display: none; }
+    .econ-mode h4 { font-family: var(--font-display); font-size: 0.9rem; margin-bottom: 4px; }
+    .econ-mode p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+    .preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: sticky;
+      top: 84px;
+    }
+
+    .preview-header {
+      background: linear-gradient(135deg, #0d2218, #0a1428);
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 50%, rgba(212,168,67,0.1), transparent 60%);
+    }
+    .preview-game-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .preview-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .preview-body { padding: 20px; }
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(42,42,58,0.5);
+      font-size: 0.87rem;
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-row-label { color: var(--text-secondary); }
+    .preview-row-value { font-weight: 600; }
+
+    .preview-players {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .preview-player-slot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px dashed var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+    .preview-player-slot.host {
+      background: var(--gold-glow);
+      border-color: var(--gold-dark);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.6rem;
+    }
+
+    @media (max-width: 900px) {
+      .create-layout { grid-template-columns: 1fr; }
+      .preview-card { position: static; }
+    }
+    @media (max-width: 500px) {
+      .form-row { grid-template-columns: 1fr; }
+      .game-grid { grid-template-columns: repeat(2, 1fr); }
+      .type-options { grid-template-columns: 1fr; }
+      .economy-modes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <div class="container">
+    <div style="padding: 32px 0 8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+      <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
+      <div>
+        <h1 style="font-family:var(--font-display);font-size:1.8rem">Crear nueva sala</h1>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:2px">Configura tu sala y comienza a jugar con amigos</p>
+      </div>
+    </div>
+
+    <form id="create-form" onsubmit="handleCreate(event)">
+      <div class="create-layout">
+        <div>
+          <div class="form-section">
+            <div class="form-section-title">
+              <div class="step-badge">1</div>
+              Elige el juego
+            </div>
+            <div class="game-grid">
+              <label class="game-option selected" onclick="selectGame('blackjack', this)">
+                <input type="radio" name="game" value="blackjack" checked>
+                <div class="game-option-icon">🃏</div>
+                <div class="game-option-label">Blackjack</div>
+              </label>
+              <label class="game-option" onclick="selectGame('ruleta', this)">
+                <input type="radio" name="game" value="ruleta">
+                <div class="game-option-icon">🎡</div>
+                <div class="game-option-label">Ruleta</div>
+              </label>
+              <label class="game-option" onclick="selectGame('poker', this)">
+                <input type="radio" name="game" value="poker">
+                <div class="game-option-icon">♠️</div>
+                <div class="game-option-label">Poker</div>
+              </label>
+              <label class="game-option" onclick="selectGame('slots', this)">
+                <input type="radio" name="game" value="slots">
+                <div class="game-option-icon">🎰</div>
+                <div class="game-option-label">Slots</div>
+              </label>
+              <label class="game-option" onclick="selectGame('baccarat', this)">
+                <input type="radio" name="game" value="baccarat">
+                <div class="game-option-icon">🎴</div>
+                <div class="game-option-label">Baccarat</div>
+              </label>
+              <label class="game-option" onclick="selectGame('dados', this)">
+                <input type="radio" name="game" value="dados">
+                <div class="game-option-icon">🎲</div>
+                <div class="game-option-label">Dados</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">
+              <div class="step-badge">2</div>
+              Nombre y detalles
+            </div>
+            <div class="form-stack" style="display:flex;flex-direction:column;gap:16px">
+              <div class="form-group">
+                <label class="form-label">Nombre de la sala</label>
+                <input type="text" class="form-control" id="room-name"
+                  placeholder="Ej: Blackjack de los viernes"
+                  maxlength="50" required oninput="updatePreview()">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Máx. jugadores</label>
+                  <select class="form-control" id="room-maxplayers" onchange="updatePreview()">
+                    <option value="2">2 jugadores</option>
+                    <option value="4">4 jugadores</option>
+                    <option value="6" selected>6 jugadores</option>
+                    <option value="8">8 jugadores</option>
+                    <option value="10">10 jugadores</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Modo torneo</label>
+                  <select class="form-control" id="room-tournament" onchange="updatePreview()">
+                    <option value="0">No (partida normal)</option>
+                    <option value="1">Sí (brackets eliminatorios)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">
+              <div class="step-badge">3</div>
+              Acceso a la sala
+            </div>
+            <div class="type-options" style="margin-bottom:16px">
+              <label class="type-option selected" onclick="selectType('public', this)">
+                <input type="radio" name="type" value="public" checked>
+                <div class="type-option-icon">🌍</div>
+                <div class="type-option-label">Pública</div>
+                <div class="type-option-desc">Visible para todos</div>
+              </label>
+              <label class="type-option" onclick="selectType('private', this)">
+                <input type="radio" name="type" value="private">
+                <div class="type-option-icon">🔒</div>
+                <div class="type-option-label">Privada</div>
+                <div class="type-option-desc">Solo con código</div>
+              </label>
+              <label class="type-option" onclick="selectType('password', this)">
+                <input type="radio" name="type" value="password">
+                <div class="type-option-icon">🔑</div>
+                <div class="type-option-label">Contraseña</div>
+                <div class="type-option-desc">Requiere clave</div>
+              </label>
+            </div>
+            <div id="password-wrap" style="display:none">
+              <div class="form-group">
+                <label class="form-label">Contraseña de la sala</label>
+                <input type="text" class="form-control" id="room-password"
+                  placeholder="Ej: amigos2026" maxlength="30">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">
+              <div class="step-badge">4</div>
+              Fichas y economía
+            </div>
+
+            <div class="economy-modes" style="margin-bottom:20px">
+              <label class="econ-mode selected" onclick="selectEconomy('fixed', this)">
+                <input type="radio" name="economy" value="fixed" checked>
+                <h4>Fichas fijas</h4>
+                <p>Todos los jugadores comienzan con la misma cantidad</p>
+              </label>
+              <label class="econ-mode" onclick="selectEconomy('host', this)">
+                <input type="radio" name="economy" value="host">
+                <h4>Reparto manual</h4>
+                <p>El anfitrión reparte fichas a cada jugador a su criterio</p>
+              </label>
+            </div>
+
+            <div id="coins-wrap">
+              <label class="form-label">Fichas de inicio por jugador</label>
+              <div class="coins-slider-wrap">
+                <div class="coins-display" id="coins-display">1.000</div>
+                <input type="range" id="coins-slider" min="100" max="50000" step="100" value="1000"
+                  oninput="updateCoinsDisplay(this.value)">
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px">
+                  <span>100</span><span>10.000</span><span>50.000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-full" id="create-btn">
+            Crear sala y entrar
+          </button>
+        </div>
+
+        <div>
+          <div class="preview-card">
+            <div class="preview-header">
+              <div class="preview-game-icon" id="prev-icon">🃏</div>
+              <div class="preview-name" id="prev-name">Mi sala</div>
+              <div style="display:flex;gap:6px;margin-top:8px" id="prev-badges">
+                <span class="badge badge-green">Esperando</span>
+                <span class="badge badge-blue">Pública</span>
+              </div>
+            </div>
+            <div class="preview-body">
+              <div class="preview-row">
+                <span class="preview-row-label">Juego</span>
+                <span class="preview-row-value" id="prev-game">Blackjack</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row-label">Anfitrión</span>
+                <span class="preview-row-value" id="prev-host">—</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row-label">Fichas inicio</span>
+                <span class="preview-row-value gold" id="prev-coins" style="color:var(--gold)">◈ 1.000</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row-label">Economía</span>
+                <span class="preview-row-value" id="prev-econ">Fijas para todos</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row-label">Torneo</span>
+                <span class="preview-row-value" id="prev-tourn">No</span>
+              </div>
+              <div class="preview-row" style="border-bottom:none;flex-direction:column;align-items:flex-start;gap:8px">
+                <span class="preview-row-label">Jugadores (máx. <span id="prev-max">6</span>)</span>
+                <div class="preview-players" id="prev-players"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(212,168,67,0.06);border:1px solid rgba(212,168,67,0.2);border-radius:var(--radius-md);padding:14px 16px;margin-top:16px;font-size:0.82rem;color:var(--text-secondary)">
+            <strong style="color:var(--gold);display:block;margin-bottom:4px">Como anfitrión puedes:</strong>
+            Iniciar / pausar la partida · Repartir fichas · Ver ranking · Expulsar jugadores · Finalizar sesión
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const gameIcons  = { blackjack:'🃏', ruleta:'🎡', poker:'♠️', slots:'🎰', baccarat:'🎴', dados:'🎲' };
+    const gameLabels = { blackjack:'Blackjack', ruleta:'Ruleta', poker:'Poker Texas Hold\'em', slots:'Tragaperras', baccarat:'Baccarat', dados:'Dados (Craps)' };
+
+    let selectedGame = 'blackjack';
+    let selectedType = 'public';
+    let selectedEconomy = 'fixed';
+
+    function selectGame(game, el) {
+      selectedGame = game;
+      document.querySelectorAll('.game-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      updatePreview();
+    }
+
+    function selectType(type, el) {
+      selectedType = type;
+      document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('password-wrap').style.display = type === 'password' ? 'block' : 'none';
+      updatePreview();
+    }
+
+    function selectEconomy(mode, el) {
+      selectedEconomy = mode;
+      document.querySelectorAll('.econ-mode').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('coins-wrap').style.display = mode === 'fixed' ? 'block' : 'none';
+      updatePreview();
+    }
+
+    function updateCoinsDisplay(val) {
+      const n = parseInt(val);
+      document.getElementById('coins-display').textContent = n.toLocaleString('es-ES');
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const user = BetM8.getUser();
+      const name = document.getElementById('room-name').value || 'Mi sala';
+      const max = parseInt(document.getElementById('room-maxplayers').value);
+      const coins = parseInt(document.getElementById('coins-slider').value);
+      const tourn = document.getElementById('room-tournament').value === '1';
+
+      document.getElementById('prev-icon').textContent = gameIcons[selectedGame] || '🎮';
+      document.getElementById('prev-name').textContent = name;
+      document.getElementById('prev-game').textContent = gameLabels[selectedGame] || selectedGame;
+      document.getElementById('prev-host').textContent = user?.username || '—';
+      document.getElementById('prev-coins').textContent = selectedEconomy === 'host' ? 'Manual (anfitrión)' : '◈ ' + coins.toLocaleString('es-ES');
+      document.getElementById('prev-econ').textContent = selectedEconomy === 'fixed' ? 'Fijas para todos' : 'Reparto manual';
+      document.getElementById('prev-tourn').textContent = tourn ? '🏆 Sí' : 'No';
+      document.getElementById('prev-max').textContent = max;
+
+      const typeBadge = selectedType === 'public'
+        ? '<span class="badge badge-blue">Pública</span>'
+        : selectedType === 'private'
+        ? '<span class="badge badge-purple">Privada</span>'
+        : '<span class="badge badge-gold">Con contraseña</span>';
+      document.getElementById('prev-badges').innerHTML = '<span class="badge badge-green">Esperando</span>' + typeBadge + (tourn ? '<span class="badge badge-gold" style="margin-left:4px">Torneo</span>' : '');
+
+      const slots = document.getElementById('prev-players');
+      slots.innerHTML = '';
+      for (let i = 0; i < max; i++) {
+        const el = document.createElement('div');
+        el.className = 'preview-player-slot' + (i === 0 ? ' host' : '');
+        el.textContent = i === 0 ? (user?.avatar || 'Tú') : '+';
+        slots.appendChild(el);
+      }
+    }
+
+    function handleCreate(e) {
+      e.preventDefault();
+      const user = BetM8.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      const name = document.getElementById('room-name').value.trim();
+      if (!name) { BetM8.toast('Ponle nombre a la sala', 'warning'); return; }
+
+      const password = selectedType === 'password' ? document.getElementById('room-password').value.trim() : '';
+      if (selectedType === 'password' && !password) { BetM8.toast('Introduce una contraseña para la sala', 'warning'); return; }
+
+      const btn = document.getElementById('create-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creando sala...';
+
+      const inviteCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+
+      setTimeout(() => {
+        const room = BetM8.createRoom({
+          name,
+          game: selectedGame,
+          gameLabel: gameLabels[selectedGame],
+          type: selectedType === 'public' ? 'public' : 'private',
+          password,
+          maxPlayers: parseInt(document.getElementById('room-maxplayers').value),
+          startingCoins: parseInt(document.getElementById('coins-slider').value),
+          economy: selectedEconomy,
+          isTournament: document.getElementById('room-tournament').value === '1',
+          inviteCode,
+        });
+
+        BetM8.toast('¡Sala "' + name + '" creada!', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'gestion-sala.html?room=' + room.id;
+        }, 600);
+      }, 700);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!BetM8.getUser()) window.location.href = 'login.html';
+      updatePreview();
+    });
+  </script>
+</body>
+</html>
