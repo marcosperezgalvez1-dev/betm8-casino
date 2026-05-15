@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby — BetM8</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .lobby-header {
+      padding: 40px 0 32px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .lobby-header h1 { font-family: var(--font-display); font-size: 2rem; line-height: 1.2; margin: 0 0 6px; }
+    .lobby-header p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+
+    .filters-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .filter-search {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .filter-search input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 8px 12px 8px 34px;
+    }
+    .filter-search input:focus { outline: none; border-color: var(--gold-dark); }
+    .filter-search::before {
+      content: '🔍';
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 0.85rem; pointer-events: none;
+    }
+
+    .filter-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .filter-select:focus { outline: none; border-color: var(--gold-dark); }
+
+    .filter-tabs { display: flex; gap: 4px; }
+    .filter-tab {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+    .filter-tab.active {
+      background: var(--gold-glow);
+      border-color: var(--gold-dark);
+      color: var(--gold);
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .room-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .room-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+      border-color: var(--border-light);
+    }
+    .room-card.full { opacity: 0.6; }
+
+    .room-card-top {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .room-game-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .icon-blackjack { background: linear-gradient(135deg,#0d2218,#0a3320); }
+    .icon-ruleta    { background: linear-gradient(135deg,#1a0a0a,#2d0f0f); }
+    .icon-poker     { background: linear-gradient(135deg,#0a0d2a,#0f1540); }
+    .icon-slots     { background: linear-gradient(135deg,#1a0d2a,#2a1040); }
+    .icon-baccarat  { background: linear-gradient(135deg,#1a1a0a,#2d2a0f); }
+    .icon-dados     { background: linear-gradient(135deg,#0a1a1a,#0f2a2a); }
+
+    .room-card-info { flex: 1; min-width: 0; }
+    .room-name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .room-host { font-size: 0.8rem; color: var(--text-muted); }
+    .room-host span { color: var(--text-secondary); }
+    .room-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+    .room-card-bottom {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .room-players {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .player-dots { display: flex; gap: 3px; }
+    .player-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .player-dot.filled { background: var(--gold); }
+
+    .room-coins {
+      font-size: 0.82rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .room-coins::before { content: '◈ '; }
+
+    .room-time { font-size: 0.78rem; color: var(--text-muted); }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.95) translateY(10px); opacity: 0; }
+      to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+    .modal-icon { font-size: 2rem; }
+    .modal-header h2 { font-family: var(--font-display); font-size: 1.4rem; }
+    .modal-header p { font-size: 0.85rem; color: var(--text-secondary); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .code-join {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .code-join p { color: var(--text-secondary); font-size: 0.9rem; flex: 1; min-width: 160px; }
+    .code-join input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: monospace;
+      font-size: 1rem;
+      padding: 9px 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      width: 140px;
+    }
+    .code-join input:focus { outline: none; border-color: var(--gold-dark); }
+
+    @media (max-width: 600px) {
+      .lobby-header { flex-direction: column; align-items: flex-start; }
+      .rooms-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <div class="container">
+    <div class="lobby-header">
+      <div>
+        <h1>Lobby de salas</h1>
+        <p id="rooms-count">Cargando salas...</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="crear-sala.html" class="btn btn-primary">+ Nueva sala</a>
+      </div>
+    </div>
+
+    <div class="code-join">
+      <p>¿Tienes un código de invitación privado?</p>
+      <input type="text" id="code-input" placeholder="ABC12345" maxlength="8">
+      <button class="btn btn-outline btn-sm" onclick="joinByCode()">Unirse</button>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-search">
+        <input type="text" id="search-input" placeholder="Buscar sala o anfitrión..." oninput="renderRooms()">
+      </div>
+      <select class="filter-select" id="filter-game" onchange="renderRooms()">
+        <option value="">Todos los juegos</option>
+        <option value="blackjack">Blackjack</option>
+        <option value="ruleta">Ruleta</option>
+        <option value="poker">Poker</option>
+        <option value="slots">Tragaperras</option>
+        <option value="baccarat">Baccarat</option>
+        <option value="dados">Dados</option>
+      </select>
+      <select class="filter-select" id="filter-status" onchange="renderRooms()">
+        <option value="">Cualquier estado</option>
+        <option value="waiting">Esperando</option>
+        <option value="playing">En juego</option>
+      </select>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setTypeFilter('all', this)">Todas</button>
+        <button class="filter-tab" onclick="setTypeFilter('public', this)">Públicas</button>
+        <button class="filter-tab" onclick="setTypeFilter('private', this)">Privadas</button>
+      </div>
+    </div>
+
+    <div class="rooms-grid" id="rooms-grid"></div>
+  </div>
+
+  <div class="modal-overlay" id="join-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-icon" id="modal-icon">🃏</div>
+        <div>
+          <h2 id="modal-title">Unirse a sala</h2>
+          <p id="modal-subtitle">Sala pública</p>
+        </div>
+      </div>
+
+      <div id="modal-pass-wrap" style="display:none;margin-bottom:8px">
+        <div class="form-group">
+          <label class="form-label">Contraseña de la sala</label>
+          <input type="password" class="form-control" id="modal-pass" placeholder="Introduce la contraseña">
+        </div>
+      </div>
+
+      <div id="modal-info" style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.85rem;color:var(--text-secondary)"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" id="modal-join-btn" onclick="confirmJoin()">Unirse</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let typeFilter = 'all';
+    let selectedRoom = null;
+
+    const gameIcons = { blackjack:'🃏', ruleta:'🎡', poker:'♠️', slots:'🎰', baccarat:'🎴', dados:'🎲' };
+    const gameLabels = { blackjack:'Blackjack', ruleta:'Ruleta', poker:'Poker', slots:'Tragaperras', baccarat:'Baccarat', dados:'Dados' };
+
+    function setTypeFilter(type, btn) {
+      typeFilter = type;
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderRooms();
+    }
+
+    function renderRooms() {
+      const grid = document.getElementById('rooms-grid');
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const game = document.getElementById('filter-game').value;
+      const status = document.getElementById('filter-status').value;
+
+      let rooms = BetM8.getRooms().filter(r => {
+        if (search && !r.name.toLowerCase().includes(search) && !r.host.toLowerCase().includes(search)) return false;
+        if (game && r.game !== game) return false;
+        if (status && r.status !== status) return false;
+        if (typeFilter === 'public' && r.type !== 'public') return false;
+        if (typeFilter === 'private' && r.type !== 'private') return false;
+        return true;
+      });
+
+      document.getElementById('rooms-count').textContent =
+        rooms.length + ' sala' + (rooms.length !== 1 ? 's' : '') + ' encontrada' + (rooms.length !== 1 ? 's' : '');
+
+      if (rooms.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-icon">🔍</div>
+          <h3>No hay salas</h3>
+          <p>Prueba a cambiar los filtros o <a href="crear-sala.html" style="color:var(--gold)">crea una sala nueva</a></p>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = rooms.map(r => {
+        const full = r.players.length >= r.maxPlayers;
+        const statusBadge = r.status === 'playing'
+          ? '<span class="badge badge-red">En juego</span>'
+          : '<span class="badge badge-green">Esperando</span>';
+        const typeBadge = r.type === 'private'
+          ? '<span class="badge badge-purple">🔒 Privada</span>'
+          : '<span class="badge badge-blue">Pública</span>';
+        const tournBadge = r.isTournament ? '<span class="badge badge-gold">Torneo</span>' : '';
+
+        const dots = Array.from({length: r.maxPlayers}, (_, i) =>
+          `<div class="player-dot ${i < r.players.length ? 'filled' : ''}"></div>`
+        ).join('');
+
+        const iconClass = 'icon-' + r.game;
+
+        return `<div class="room-card ${full ? 'full' : ''}" onclick="openJoinModal('${r.id}')">
+          <div class="room-card-top">
+            <div class="room-game-icon ${iconClass}">${gameIcons[r.game] || '🎮'}</div>
+            <div class="room-card-info">
+              <div class="room-name">${r.name}</div>
+              <div class="room-host">Anfitrión: <span>${r.host}</span></div>
+              <div class="room-card-badges">${statusBadge}${typeBadge}${tournBadge}</div>
+            </div>
+          </div>
+          <div class="room-card-bottom">
+            <div class="room-players">
+              <div class="player-dots">${dots}</div>
+              <span>${r.players.length}/${r.maxPlayers}</span>
+            </div>
+            <div class="room-coins">${BetM8.formatCoins(r.startingCoins || 1000)}</div>
+            <div class="room-time">${BetM8.timeAgo(r.createdAt)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openJoinModal(roomId) {
+      const user = BetM8.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      const room = BetM8.getRoom(roomId);
+      if (!room) return;
+      selectedRoom = room;
+
+      document.getElementById('modal-icon').textContent = gameIcons[room.game] || '🎮';
+      document.getElementById('modal-title').textContent = room.name;
+      document.getElementById('modal-subtitle').textContent =
+        (room.type === 'private' ? '🔒 Sala privada · ' : 'Sala pública · ') + gameLabels[room.game];
+      document.getElementById('modal-pass-wrap').style.display = room.password ? 'block' : 'none';
+      document.getElementById('modal-pass').value = '';
+
+      const full = room.players.length >= room.maxPlayers;
+      const btn = document.getElementById('modal-join-btn');
+      btn.disabled = full || room.status === 'playing';
+      btn.textContent = full ? 'Sala llena' : room.status === 'playing' ? 'Partida en curso' : 'Unirse';
+
+      document.getElementById('modal-info').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between"><span>Jugadores</span><strong>${room.players.length}/${room.maxPlayers}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Fichas de inicio</span><strong style="color:var(--gold)">◈ ${BetM8.formatCoins(room.startingCoins || 1000)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Anfitrión</span><strong>${room.host}</strong></div>
+          ${room.isTournament ? '<div style="color:var(--gold);font-size:0.8rem;margin-top:4px">🏆 Modo torneo activo</div>' : ''}
+        </div>`;
+
+      document.getElementById('join-modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('join-modal').classList.remove('open');
+      selectedRoom = null;
+    }
+
+    function confirmJoin() {
+      if (!selectedRoom) return;
+      const pass = document.getElementById('modal-pass').value;
+      const result = BetM8.joinRoom(selectedRoom.id, pass);
+      if (result.ok) {
+        BetM8.toast('Te has unido a ' + selectedRoom.name, 'success');
+        closeModal();
+        const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
+        setTimeout(() => {
+          window.location.href = (gamePages[selectedRoom.game] || 'lobby.html') + '?room=' + selectedRoom.id;
+        }, 500);
+      } else {
+        BetM8.toast(result.msg, 'error');
+      }
+    }
+
+    function joinByCode() {
+      const code = document.getElementById('code-input').value.trim().toUpperCase();
+      if (!code) { BetM8.toast('Introduce un código', 'warning'); return; }
+      const user = BetM8.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+      const rooms = BetM8.getRooms();
+      const room = rooms.find(r => r.inviteCode === code || r.id.endsWith(code));
+      if (!room) { BetM8.toast('Código no válido o sala no encontrada', 'error'); return; }
+      openJoinModal(room.id);
+    }
+
+    document.getElementById('join-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    renderRooms();
+    setInterval(renderRooms, 10000);
+  </script>
+</body>
+</html>
