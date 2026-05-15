@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cómo funciona — BetM8</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .hero-small { padding: 64px 0 48px; text-align: center; position: relative; overflow: hidden; }
+    .hero-small::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(212,168,67,0.07) 0%, transparent 70%); pointer-events: none; }
+    .hero-small h1 { font-family: var(--font-display); font-size: clamp(2rem,5vw,3.5rem); margin-bottom: 12px; }
+    .hero-small p { color: var(--text-secondary); font-size: 1.05rem; max-width: 520px; margin: 0 auto; }
+
+    .timeline { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
+    .timeline-item { display: grid; grid-template-columns: 72px 1fr; gap: 0 24px; position: relative; }
+    .timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 35px; top: 72px; bottom: 0; width: 2px; background: linear-gradient(var(--gold-dark), var(--border)); }
+    .timeline-dot-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+    .timeline-dot { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--gold-dark); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--gold); flex-shrink: 0; box-shadow: 0 0 16px rgba(212,168,67,0.2); position: relative; z-index: 1; }
+    .timeline-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; transition: border-color 0.2s; }
+    .timeline-content:hover { border-color: var(--gold-dark); }
+    .timeline-content h3 { font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 8px; color: var(--text-primary); }
+    .timeline-content p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-bottom: 12px; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 80px; }
+    .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; }
+    .feature-icon { width: 44px; height: 44px; background: var(--gold-glow); border: 1px solid rgba(212,168,67,0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 16px; }
+    .feature-card h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 8px; }
+    .feature-card p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
+
+    .rooms-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 32px 0; }
+    .room-type-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px 22px; }
+    .room-type-card h4 { font-family: var(--font-display); font-size: 1rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .room-type-card p { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; }
+
+    .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .schema-table { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .schema-table-header { background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 10px 16px; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+    .schema-table-header::before { content: '⬛'; font-size: 0.7rem; color: var(--gold-dark); }
+    .schema-field { padding: 8px 16px; border-bottom: 1px solid rgba(42,42,58,0.5); font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
+    .schema-field:last-child { border-bottom: none; }
+    .schema-field-name { color: var(--text-primary); font-family: monospace; }
+    .schema-field-type { color: var(--neon-blue); font-family: monospace; font-size: 0.78rem; }
+    .schema-field-pk { color: var(--gold); font-size: 0.7rem; font-weight: 700; }
+
+    .section { padding: 64px 0; }
+    .games-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 20px 0; }
+    .game-row { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; }
+    .game-row-icon { font-size: 1.5rem; }
+    .game-row-info h4 { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 2px; }
+    .game-row-info p { font-size: 0.78rem; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="betm8-nav"></nav>
+
+  <div class="hero-small">
+    <div class="container">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.25);border-radius:999px;padding:5px 14px;font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px">Guía completa</div>
+      <h1>¿Cómo funciona BetM8?</h1>
+      <p>Todo lo que necesitas saber para empezar a jugar con tus amigos</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:40px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Paso a paso</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem)">De cero a jugando en minutos</h2>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">1</div></div>
+          <div class="timeline-content">
+            <h3>Crea tu cuenta gratis</h3>
+            <p>Regístrate con un nombre de usuario, email y contraseña. Sin tarjeta de crédito, sin depósito. Al registrarte recibes automáticamente <strong style="color:var(--gold)">◈ 5.000 fichas virtuales</strong> de bienvenida.</p>
+            <span class="badge badge-green">Sin coste</span>
+            <span class="badge badge-gold" style="margin-left:6px">◈ 5.000 fichas</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">2</div></div>
+          <div class="timeline-content">
+            <h3>Explora el Lobby de salas</h3>
+            <p>Ve al Lobby para ver todas las salas disponibles. Puedes filtrar por juego, tipo (pública/privada) o estado (esperando/en juego). Únete a una sala pública directamente o introduce el código de invitación de una sala privada.</p>
+            <span class="badge badge-blue">Salas públicas</span>
+            <span class="badge badge-purple" style="margin-left:6px">Salas privadas</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">3</div></div>
+          <div class="timeline-content">
+            <h3>O crea tu propia sala</h3>
+            <p>Como anfitrión decides el juego, el nombre, si la sala es pública o privada, la contraseña (opcional), el límite de jugadores, las fichas iniciales de cada participante y si quieres un modo torneo. Puedes compartir el código de invitación con tus amigos.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <span class="badge badge-gold">Elige el juego</span>
+              <span class="badge badge-blue">Controla las fichas</span>
+              <span class="badge badge-purple">Modo torneo</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">4</div></div>
+          <div class="timeline-content">
+            <h3>El anfitrión gestiona la partida</h3>
+            <p>El líder de sala tiene un panel de control exclusivo: puede iniciar la partida, pausarla, ver el ranking en tiempo real, repartir fichas extra a jugadores específicos, expulsar jugadores y finalizar la sesión.</p>
+            <span class="badge badge-red">Control total</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">5</div></div>
+          <div class="timeline-content">
+            <h3>¡A jugar y a chatear!</h3>
+            <p>Una vez dentro de la sala, puedes jugar tu juego elegido, chatear con el resto de jugadores en tiempo real y ver el ranking de la sala. Todo con fichas virtuales — la emoción del casino sin riesgo económico real.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <span class="badge badge-green">Chat en vivo</span>
+              <span class="badge badge-gold">Ranking de sala</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--bg-surface)">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Salas</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem)">Tipos de sala</h2>
+      </div>
+      <div class="rooms-types">
+        <div class="room-type-card"><h4><span class="badge badge-green">Pública</span></h4><p>Visible para todos los usuarios. Cualquiera puede unirse libremente hasta el límite de jugadores.</p></div>
+        <div class="room-type-card"><h4><span class="badge badge-blue">Privada</span></h4><p>Acceso mediante código de invitación único. Solo los jugadores con el código pueden encontrar y unirse.</p></div>
+        <div class="room-type-card"><h4><span class="badge badge-purple">Con contraseña</span></h4><p>Visible en el lobby pero protegida. Requiere contraseña para entrar, además del código opcional.</p></div>
+        <div class="room-type-card"><h4><span class="badge badge-gold">Torneo</span></h4><p>Modo especial con brackets eliminatorios. El anfitrión gestiona las rondas y el cuadro de enfrentamientos.</p></div>
+      </div>
+
+      <div style="margin-top:48px">
+        <h3 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:8px">Economía de fichas</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px">El anfitrión controla la economía de su sala:</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+          <div class="feature-card" style="padding:18px 20px"><div class="feature-icon" style="margin-bottom:10px">◈</div><h3 style="font-size:0.95rem;margin-bottom:4px">Fichas de inicio fijas</h3><p>Todos los jugadores comienzan con la misma cantidad definida por el anfitrión.</p></div>
+          <div class="feature-card" style="padding:18px 20px"><div class="feature-icon" style="margin-bottom:10px">🎁</div><h3 style="font-size:0.95rem;margin-bottom:4px">Reparto manual</h3><p>El anfitrión puede dar fichas adicionales a jugadores concretos en cualquier momento.</p></div>
+          <div class="feature-card" style="padding:18px 20px"><div class="feature-icon" style="margin-bottom:10px">📊</div><h3 style="font-size:0.95rem;margin-bottom:4px">Ranking en vivo</h3><p>Clasificación actualizada de jugadores ordenados por fichas acumuladas en la sala.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="margin-bottom:32px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Juegos</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem)">Los 6 juegos de BetM8</h2>
+      </div>
+      <div class="games-list">
+        <div class="game-row"><div class="game-row-icon">🃏</div><div class="game-row-info"><h4>Blackjack</h4><p>Llega a 21 sin pasarte. Supera al crupier.</p></div><a href="blackjack.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+        <div class="game-row"><div class="game-row-icon">🎡</div><div class="game-row-info"><h4>Ruleta Europea</h4><p>Apuesta a números, colores o grupos.</p></div><a href="ruleta.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+        <div class="game-row"><div class="game-row-icon">♠️</div><div class="game-row-info"><h4>Poker Texas Hold'em</h4><p>Estrategia, faroleo y cartas comunitarias.</p></div><a href="poker.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+        <div class="game-row"><div class="game-row-icon">🎰</div><div class="game-row-info"><h4>Tragaperras</h4><p>Rodillos, líneas y jackpot progresivo.</p></div><a href="slots.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+        <div class="game-row"><div class="game-row-icon">🎴</div><div class="game-row-info"><h4>Baccarat</h4><p>Jugador vs Banca. El 9 gana.</p></div><a href="baccarat.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+        <div class="game-row"><div class="game-row-icon">🎲</div><div class="game-row-info"><h4>Dados (Craps)</h4><p>Lanza y apuesta al resultado del dado.</p></div><a href="dados.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--bg-surface)">
+    <div class="container">
+      <div style="margin-bottom:32px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Base de datos</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem)">Esquema MySQL</h2>
+        <p style="color:var(--text-secondary);margin-top:8px;font-size:0.9rem">Tablas principales del backend BetM8</p>
+      </div>
+      <div class="schema-grid">
+        <div class="schema-table">
+          <div class="schema-table-header">usuarios</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">username</span><span class="schema-field-type">VARCHAR(30) UNIQUE</span></div>
+          <div class="schema-field"><span class="schema-field-name">email</span><span class="schema-field-type">VARCHAR(100) UNIQUE</span></div>
+          <div class="schema-field"><span class="schema-field-name">password_hash</span><span class="schema-field-type">VARCHAR(255)</span></div>
+          <div class="schema-field"><span class="schema-field-name">coins</span><span class="schema-field-type">BIGINT DEFAULT 5000</span></div>
+          <div class="schema-field"><span class="schema-field-name">xp</span><span class="schema-field-type">INT DEFAULT 0</span></div>
+          <div class="schema-field"><span class="schema-field-name">created_at</span><span class="schema-field-type">TIMESTAMP</span></div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-table-header">salas</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">nombre</span><span class="schema-field-type">VARCHAR(60)</span></div>
+          <div class="schema-field"><span class="schema-field-name">juego</span><span class="schema-field-type">ENUM(bj,rl,pk,sl,bc,cr)</span></div>
+          <div class="schema-field"><span class="schema-field-name">host_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">tipo</span><span class="schema-field-type">ENUM(public,private)</span></div>
+          <div class="schema-field"><span class="schema-field-name">password</span><span class="schema-field-type">VARCHAR(60) NULL</span></div>
+          <div class="schema-field"><span class="schema-field-name">max_jugadores</span><span class="schema-field-type">TINYINT DEFAULT 8</span></div>
+          <div class="schema-field"><span class="schema-field-name">fichas_inicio</span><span class="schema-field-type">INT DEFAULT 1000</span></div>
+          <div class="schema-field"><span class="schema-field-name">estado</span><span class="schema-field-type">ENUM(waiting,playing,done)</span></div>
+          <div class="schema-field"><span class="schema-field-name">codigo_inv</span><span class="schema-field-type">VARCHAR(8) UNIQUE</span></div>
+          <div class="schema-field"><span class="schema-field-name">es_torneo</span><span class="schema-field-type">TINYINT(1) DEFAULT 0</span></div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-table-header">sala_jugadores</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">fichas</span><span class="schema-field-type">INT</span></div>
+          <div class="schema-field"><span class="schema-field-name">unido_at</span><span class="schema-field-type">TIMESTAMP</span></div>
+          <div class="schema-field"><span class="schema-field-name">activo</span><span class="schema-field-type">TINYINT(1) DEFAULT 1</span></div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-table-header">partidas</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">ronda</span><span class="schema-field-type">INT DEFAULT 1</span></div>
+          <div class="schema-field"><span class="schema-field-name">iniciada_at</span><span class="schema-field-type">TIMESTAMP</span></div>
+          <div class="schema-field"><span class="schema-field-name">finalizada_at</span><span class="schema-field-type">TIMESTAMP NULL</span></div>
+          <div class="schema-field"><span class="schema-field-name">estado_json</span><span class="schema-field-type">JSON</span></div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-table-header">transacciones</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">sala_id</span><span class="schema-field-type">INT NULL</span></div>
+          <div class="schema-field"><span class="schema-field-name">cantidad</span><span class="schema-field-type">INT</span></div>
+          <div class="schema-field"><span class="schema-field-name">tipo</span><span class="schema-field-type">ENUM(win,loss,gift,init)</span></div>
+          <div class="schema-field"><span class="schema-field-name">descripcion</span><span class="schema-field-type">VARCHAR(120)</span></div>
+          <div class="schema-field"><span class="schema-field-name">creado_at</span><span class="schema-field-type">TIMESTAMP</span></div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-table-header">mensajes_chat</div>
+          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
+          <div class="schema-field"><span class="schema-field-name">mensaje</span><span class="schema-field-type">VARCHAR(300)</span></div>
+          <div class="schema-field"><span class="schema-field-name">enviado_at</span><span class="schema-field-type">TIMESTAMP</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="text-align:center">
+      <h2 style="font-family:var(--font-display);font-size:2rem;margin-bottom:12px">¿Listo para empezar?</h2>
+      <p style="color:var(--text-secondary);margin-bottom:28px">Crea tu cuenta gratis y recibe ◈ 5.000 fichas</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="register.html" class="btn btn-primary btn-lg">Registrarse gratis</a>
+        <a href="lobby.html" class="btn btn-ghost btn-lg">Ver salas activas</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
