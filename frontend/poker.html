@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poker — BetM8</title>
+<link rel="stylesheet" href="css/global.css">
+<style>
+body { background:#080a14; }
+.game-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; padding:20px 0 40px; align-items:start; }
+.poker-table {
+  background: radial-gradient(ellipse at 50% 50%, #0f1540 0%, #0a0d28 60%, #050715 100%);
+  border: 3px solid #1a2060;
+  border-radius: 50% / 25%;
+  padding: 60px 40px;
+  min-height: 480px;
+  position: relative;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6), 0 0 40px rgba(26,32,96,0.3);
+}
+.poker-table::before {
+  content: '';
+  position: absolute; inset: 12px;
+  border: 1px solid rgba(212,168,67,0.2);
+  border-radius: 50% / 25%;
+  pointer-events: none;
+}
+.community {
+  display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; min-height: 100px;
+}
+.poker-card {
+  width: 64px; height: 92px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 5px 7px;
+  font-size: 0.95rem; font-weight: 700;
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.5);
+  position: relative;
+  animation: cardDeal 0.3s ease;
+}
+@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.poker-card.red { color: #c00; }
+.poker-card.back { background: linear-gradient(135deg,#1a3a8a,#0f2060); }
+.poker-card.back::after { content: '♦'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: rgba(255,255,255,0.15); }
+.poker-card .center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.4rem; }
+
+.pot-display {
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-md);
+  padding: 8px 20px;
+  display: inline-block;
+  margin: 0 auto 20px;
+}
+.pot-display-label { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.15em; }
+.pot-display-amount { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: #fff; }
+.pot-display-amount::before { content: '◈ '; color: var(--gold); }
+
+.players-ring {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.poker-player {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  text-align: center;
+  position: relative;
+}
+.poker-player.active { border-color: var(--gold); box-shadow: 0 0 16px rgba(212,168,67,0.3); }
+.poker-player.folded { opacity: 0.4; }
+.pp-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+.pp-coins { font-size: 0.78rem; color: var(--gold); }
+.pp-bet { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+.pp-cards { display: flex; gap: 3px; justify-content: center; margin-bottom: 6px; }
+.pp-mini-card { width: 22px; height: 30px; background: linear-gradient(135deg,#1a3a8a,#0f2060); border-radius: 3px; }
+
+.player-hand {
+  display: flex; gap: 10px; justify-content: center; margin-top: 24px;
+}
+
+.action-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.raise-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  width: 110px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+.side-panel { display:flex; flex-direction:column; gap:16px; }
+.info-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.hand-rank { background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--font-display); font-weight: 700; color: var(--gold); text-align: center; }
+
+@media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav class="navbar" id="betm8-nav"></nav>
+<div class="container">
+<div style="padding:16px 0 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
+<div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">♠️ Poker Texas Hold'em</div>
+<div id="room-info-bar" style="margin-left:auto"></div>
+</div>
+
+<div class="game-layout">
+<div>
+<div class="poker-table">
+<div class="players-ring" id="players-ring"></div>
+<div style="text-align:center"><div class="pot-display">
+<div class="pot-display-label">Bote</div>
+<div class="pot-display-amount" id="pot-amount">0</div>
+</div></div>
+<div class="community" id="community"></div>
+<div class="player-hand" id="player-hand"></div>
+</div>
+
+<div class="action-bar" id="action-bar">
+<button class="btn btn-danger" onclick="action('fold')">Fold</button>
+<button class="btn btn-ghost" id="check-btn" onclick="action('check')">Check</button>
+<button class="btn btn-success" id="call-btn" onclick="action('call')">Call</button>
+<input type="number" class="raise-input" id="raise-amount" min="10" step="10" value="50">
+<button class="btn btn-primary" onclick="action('raise')">Raise</button>
+<button class="btn btn-outline" onclick="action('allin')">All-In</button>
+</div>
+</div>
+
+<div class="side-panel">
+<div class="info-card">
+<div class="info-card-title">Tus fichas</div>
+<div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)">◈ <span id="balance-display">0</span></div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Tu mano actual</div>
+<div class="hand-rank" id="hand-rank">—</div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Fase</div>
+<div id="phase-label" style="font-family:var(--font-display);font-size:1rem;color:var(--text-primary)">Pre-flop</div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Historial</div>
+<div id="action-log" style="font-size:0.78rem;color:var(--text-muted);max-height:120px;overflow-y:auto"></div>
+</div>
+<a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
+</div>
+</div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+const SUITS=['♠','♥','♦','♣']; const VALUES=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const RED = new Set(['♥','♦']);
+let deck=[], community=[], playerHand=[], pot=0, balance=0, currentBet=0, phase='Pre-flop';
+let players = []; const log = [];
+
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room');
+
+function init() {
+  const user = BetM8.getUser();
+  balance = user ? (user.coins || 1000) : 1000;
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) {
+      const me = room.players.find(p => p.id === user?.id);
+      if (me) balance = me.coins || balance;
+      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.name}</span>`;
+      players = room.players.filter(p => p.id !== user?.id).slice(0,5).map(p => ({
+        name: p.username, coins: p.coins || 1000, bet: 0, folded: false
+      }));
+      if (room.hostId === user?.id) {
+        const hl = document.getElementById('host-link');
+        hl.href = 'gestion-sala.html?room=' + roomId;
+        hl.style.display = 'block';
+      }
+    }
+  }
+  if (players.length === 0) {
+    players = [
+      {name:'CasinoKing', coins:2500, bet:0, folded:false},
+      {name:'BluffMaster', coins:1800, bet:0, folded:false},
+      {name:'PokerFace', coins:3200, bet:0, folded:false},
+    ];
+  }
+  updateBalance();
+  newHand();
+}
+
+function buildDeck() {
+  deck = [];
+  for (const s of SUITS) for (const v of VALUES) deck.push({s,v});
+  for (let i=deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+}
+function draw() { return deck.pop(); }
+
+function renderCard(c, hidden) {
+  if (hidden) return `<div class="poker-card back"></div>`;
+  const isRed = RED.has(c.s);
+  return `<div class="poker-card ${isRed?'red':''}">
+    <div>${c.v}${c.s}</div>
+    <div class="center">${c.s}</div>
+    <div style="transform:rotate(180deg)">${c.v}${c.s}</div>
+  </div>`;
+}
+
+function renderAll() {
+  document.getElementById('community').innerHTML = community.map(c => renderCard(c)).join('');
+  document.getElementById('player-hand').innerHTML = playerHand.map(c => renderCard(c)).join('');
+  document.getElementById('pot-amount').textContent = pot.toLocaleString('es-ES');
+  document.getElementById('phase-label').textContent = phase;
+
+  document.getElementById('players-ring').innerHTML = players.map(p => `
+    <div class="poker-player ${p.folded?'folded':''}">
+      <div class="pp-cards">
+        <div class="pp-mini-card"></div><div class="pp-mini-card"></div>
+      </div>
+      <div class="pp-name">${p.name}</div>
+      <div class="pp-coins">◈ ${p.coins.toLocaleString('es-ES')}</div>
+      ${p.bet > 0 ? `<div class="pp-bet">Apuesta: ${p.bet}</div>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('hand-rank').textContent = evalHand([...playerHand, ...community]);
+}
+
+function evalHand(cards) {
+  if (cards.length < 5) return cards.length === 2 ? 'Pre-flop · ' + cards.map(c=>c.v+c.s).join(' ') : 'Esperando...';
+  const counts = {};
+  cards.forEach(c => counts[c.v] = (counts[c.v]||0)+1);
+  const vals = Object.values(counts).sort((a,b)=>b-a);
+  const suits = {};
+  cards.forEach(c => suits[c.s] = (suits[c.s]||0)+1);
+  const flush = Object.values(suits).some(v => v>=5);
+  if (vals[0] === 4) return 'Póker';
+  if (vals[0] === 3 && vals[1] === 2) return 'Full House';
+  if (flush) return 'Color';
+  if (vals[0] === 3) return 'Trío';
+  if (vals[0] === 2 && vals[1] === 2) return 'Doble pareja';
+  if (vals[0] === 2) return 'Pareja';
+  return 'Carta alta';
+}
+
+function newHand() {
+  buildDeck();
+  community = [];
+  playerHand = [draw(), draw()];
+  players.forEach(p => { p.bet = 0; p.folded = false; });
+  pot = 0; currentBet = 20;
+  phase = 'Pre-flop';
+  if (players[0]) { players[0].coins -= 10; players[0].bet = 10; pot += 10; }
+  if (players[1]) { players[1].coins -= 20; players[1].bet = 20; pot += 20; }
+  addLog('Nueva mano repartida');
+  renderAll();
+}
+
+function action(type) {
+  const ra = parseInt(document.getElementById('raise-amount').value) || 50;
+  if (type === 'fold') { addLog('Te has retirado'); BetM8.toast('Te has retirado','info'); aiTurn(); return; }
+  if (type === 'check') { addLog('Has hecho check'); aiTurn(); return; }
+  if (type === 'call') {
+    if (currentBet > balance) { BetM8.toast('Fichas insuficientes','warning'); return; }
+    balance -= currentBet; pot += currentBet;
+    addLog('Has igualado ◈' + currentBet);
+    aiTurn();
+  }
+  if (type === 'raise') {
+    if (ra > balance) { BetM8.toast('Fichas insuficientes','warning'); return; }
+    balance -= ra; pot += ra; currentBet = ra;
+    addLog('Has subido a ◈' + ra);
+    aiTurn();
+  }
+  if (type === 'allin') {
+    pot += balance;
+    addLog('All-in! ◈' + balance);
+    balance = 0;
+    aiTurn();
+  }
+  updateBalance();
+  saveBalance();
+  renderAll();
+}
+
+function aiTurn() {
+  setTimeout(() => {
+    players.forEach(p => {
+      if (p.folded) return;
+      const r = Math.random();
+      if (r < 0.15) { p.folded = true; addLog(p.name + ' se retira'); }
+      else if (r < 0.7) { const c = Math.min(p.coins, currentBet); p.coins -= c; pot += c; p.bet += c; addLog(p.name + ' iguala'); }
+      else { const raise = Math.min(p.coins, currentBet*2); p.coins -= raise; pot += raise; p.bet += raise; currentBet = raise; addLog(p.name + ' sube a ◈' + raise); }
+    });
+    advancePhase();
+    renderAll();
+  }, 600);
+}
+
+function advancePhase() {
+  if (phase === 'Pre-flop') { community.push(draw(),draw(),draw()); phase = 'Flop'; addLog('Flop revelado'); }
+  else if (phase === 'Flop') { community.push(draw()); phase = 'Turn'; addLog('Turn revelado'); }
+  else if (phase === 'Turn') { community.push(draw()); phase = 'River'; addLog('River revelado'); }
+  else if (phase === 'River') { showdown(); }
+}
+
+function showdown() {
+  phase = 'Showdown';
+  const won = Math.random() > 0.5;
+  if (won) { balance += pot; addLog('¡Ganas el bote de ◈' + pot + '!'); BetM8.toast('¡Ganas ◈' + pot + '!', 'success'); }
+  else { addLog('El bote va para otro jugador'); BetM8.toast('Has perdido el bote', 'info'); }
+  pot = 0;
+  updateBalance();
+  saveBalance();
+  setTimeout(newHand, 2500);
+}
+
+function addLog(msg) {
+  log.unshift(msg);
+  if (log.length > 12) log.pop();
+  document.getElementById('action-log').innerHTML = log.map(l => `<div style="padding:2px 0">${l}</div>`).join('');
+}
+
+function updateBalance() { document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES'); }
+
+function saveBalance() {
+  const user = BetM8.getUser();
+  if (!user) return;
+  user.coins = balance; BetM8.setUser(user);
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) { const me = room.players.find(p => p.id === user.id); if (me) { me.coins = balance; BetM8.updateRoom(roomId,{players:room.players}); } }
+  }
+  BetM8.renderNavbar();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
