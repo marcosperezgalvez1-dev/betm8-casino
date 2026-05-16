@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tragaperras — BetM8</title>
+<link rel="stylesheet" href="css/global.css">
+<style>
+body { background:#0f0815; }
+.game-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; padding:20px 0 40px; align-items:start; }
+.slots-area {
+  background: radial-gradient(ellipse at 50% 30%, #2a1040 0%, #1a0a2a 60%, #0a0515 100%);
+  border: 2px solid #4a2070;
+  border-radius: var(--radius-xl);
+  padding:32px 28px;
+  text-align:center;
+}
+.slots-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,168,67,0.5);
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+}
+.jackpot {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-md);
+  padding: 10px 24px;
+  display: inline-flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+.jackpot-label { font-size: 0.72rem; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; }
+.jackpot-amount { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: #fff; }
+.jackpot-amount::before { content: '◈ '; color: var(--gold); }
+
+.reels-frame {
+  background: linear-gradient(180deg, #1a0830 0%, #2a1050 100%);
+  border: 4px solid var(--gold);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 0 auto 24px;
+  max-width: 460px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 30px rgba(168,85,247,0.3);
+}
+.reel {
+  background: #0a0515;
+  border: 1px solid #4a2070;
+  border-radius: var(--radius-sm);
+  width: 110px; height: 130px;
+  overflow: hidden;
+  position: relative;
+}
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 2s cubic-bezier(0.17, 0.67, 0.21, 1);
+}
+.reel-symbol {
+  height: 130px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem;
+  flex-shrink: 0;
+}
+
+.payline-info {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
+}
+.payline-row {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 6px;
+}
+.payline-row strong { color: var(--gold); }
+
+.bet-controls {
+  display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.bet-display-slots {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 12px;
+}
+.bet-step-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.spin-btn-big {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  padding: 12px 36px;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #000;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  box-shadow: 0 4px 16px rgba(212,168,67,0.4);
+}
+.spin-btn-big:hover { box-shadow: 0 0 24px rgba(212,168,67,0.6); }
+.spin-btn-big:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.win-banner {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-card);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-xl);
+  padding: 32px 48px;
+  text-align: center;
+  z-index: 200;
+  box-shadow: 0 0 60px rgba(212,168,67,0.6);
+  display: none;
+}
+.win-banner.show { display: block; animation: winPop 0.4s ease; }
+@keyframes winPop {
+  from { transform: translate(-50%,-50%) scale(0.6); opacity: 0; }
+  to   { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+}
+.win-banner h2 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(212,168,67,0.6);
+  margin-bottom: 6px;
+}
+
+.side-panel { display:flex; flex-direction:column; gap:16px; }
+.info-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+
+@media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav class="navbar" id="betm8-nav"></nav>
+<div class="container">
+<div style="padding:16px 0 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
+<div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">🎰 Tragaperras</div>
+<div id="room-info-bar" style="margin-left:auto"></div>
+</div>
+
+<div class="game-layout">
+<div>
+<div class="slots-area">
+<div class="slots-title">LUCKY M8</div>
+<div class="jackpot">
+<span class="jackpot-label">Jackpot</span>
+<span class="jackpot-amount" id="jackpot-amount">125.000</span>
+</div>
+
+<div class="reels-frame">
+<div class="reel"><div class="reel-strip" id="reel-0"></div></div>
+<div class="reel"><div class="reel-strip" id="reel-1"></div></div>
+<div class="reel"><div class="reel-strip" id="reel-2"></div></div>
+</div>
+
+<div class="payline-info">
+<div class="payline-row">7️⃣7️⃣7️⃣ <strong>×100</strong></div>
+<div class="payline-row">💎💎💎 <strong>×50</strong></div>
+<div class="payline-row">🔔🔔🔔 <strong>×20</strong></div>
+<div class="payline-row">🍒🍒🍒 <strong>×10</strong></div>
+<div class="payline-row">🍋🍋🍋 <strong>×5</strong></div>
+<div class="payline-row">2 iguales <strong>×2</strong></div>
+</div>
+
+<div class="bet-controls">
+<div class="bet-display-slots">
+<button class="bet-step-btn" onclick="changeBet(-10)">−</button>
+APUESTA: ◈ <span id="bet-display">10</span>
+<button class="bet-step-btn" onclick="changeBet(10)">+</button>
+</div>
+<button class="spin-btn-big" id="spin-btn" onclick="spinReels()">GIRAR</button>
+</div>
+</div>
+</div>
+
+<div class="side-panel">
+<div class="info-card">
+<div class="info-card-title">Tus fichas</div>
+<div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)">◈ <span id="balance-display">0</span></div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Últimos giros</div>
+<div id="spin-history" style="font-size:0.82rem;color:var(--text-muted)">Sin giros aún</div>
+</div>
+<a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
+</div>
+</div>
+</div>
+
+<div class="win-banner" id="win-banner">
+<h2 id="win-title">¡GANAS!</h2>
+<div style="font-family:var(--font-display);font-size:1.6rem;color:#fff" id="win-amount">+◈ 0</div>
+<button class="btn btn-primary" style="margin-top:14px" onclick="document.getElementById('win-banner').classList.remove('show')">Continuar</button>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+const SYMBOLS = ['🍒','🍋','🔔','💎','7️⃣','⭐'];
+const PAYOUTS = { '7️⃣':100, '💎':50, '🔔':20, '🍒':10, '🍋':5, '⭐':15 };
+
+let balance = 0, bet = 10, jackpot = 125000;
+let history = [];
+
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room');
+
+function init() {
+  const user = BetM8.getUser();
+  balance = user ? (user.coins || 1000) : 1000;
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) {
+      const me = room.players.find(p => p.id === user?.id);
+      if (me) balance = me.coins || balance;
+      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.name}</span>`;
+      if (room.hostId === user?.id) {
+        const hl = document.getElementById('host-link');
+        hl.href = 'gestion-sala.html?room=' + roomId;
+        hl.style.display = 'block';
+      }
+    }
+  }
+  updateBalance();
+  buildReels();
+}
+
+function buildReels() {
+  for (let i = 0; i < 3; i++) {
+    const reel = document.getElementById('reel-' + i);
+    let html = '';
+    for (let j = 0; j < 30; j++) {
+      html += `<div class="reel-symbol">${SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]}</div>`;
+    }
+    reel.innerHTML = html;
+    reel.style.transform = 'translateY(0)';
+  }
+}
+
+function changeBet(delta) {
+  bet = Math.max(10, Math.min(1000, bet + delta));
+  document.getElementById('bet-display').textContent = bet;
+}
+
+function updateBalance() {
+  document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES');
+}
+
+function spinReels() {
+  if (bet > balance) { BetM8.toast('Fichas insuficientes', 'warning'); return; }
+  balance -= bet;
+  jackpot += Math.floor(bet * 0.1);
+  document.getElementById('jackpot-amount').textContent = jackpot.toLocaleString('es-ES');
+  updateBalance();
+  document.getElementById('spin-btn').disabled = true;
+
+  const result = [SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)], SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)], SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]];
+
+  for (let i = 0; i < 3; i++) {
+    const reel = document.getElementById('reel-' + i);
+    let html = '';
+    for (let j = 0; j < 25; j++) {
+      html += `<div class="reel-symbol">${SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]}</div>`;
+    }
+    html += `<div class="reel-symbol">${result[i]}</div>`;
+    reel.innerHTML = html;
+    reel.style.transition = 'none';
+    reel.style.transform = 'translateY(0)';
+    setTimeout(() => {
+      reel.style.transition = `transform ${1.6 + i*0.4}s cubic-bezier(0.17,0.67,0.21,1)`;
+      reel.style.transform = `translateY(-${25 * 130}px)`;
+    }, 30);
+  }
+
+  setTimeout(() => {
+    resolveSpin(result);
+  }, 2200);
+}
+
+function resolveSpin(result) {
+  let win = 0, label = '';
+  if (result[0] === result[1] && result[1] === result[2]) {
+    if (result[0] === '7️⃣') {
+      win = jackpot;
+      label = '¡JACKPOT!';
+      jackpot = 100000;
+    } else {
+      win = bet * (PAYOUTS[result[0]] || 5);
+      label = '¡TRIPLE ' + result[0] + '!';
+    }
+  } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+    win = bet * 2;
+    label = 'Doble';
+  }
+
+  if (win > 0) {
+    balance += win;
+    document.getElementById('win-title').textContent = label;
+    document.getElementById('win-amount').textContent = '+◈ ' + win.toLocaleString('es-ES');
+    document.getElementById('win-banner').classList.add('show');
+  }
+
+  history.unshift({ result, win });
+  if (history.length > 8) history.pop();
+  document.getElementById('spin-history').innerHTML = history.map(h =>
+    `<div style="display:flex;justify-content:space-between;padding:4px 0">
+      <span>${h.result.join(' ')}</span>
+      <span style="color:${h.win>0?'var(--neon-green)':'var(--text-muted)'};font-weight:600">${h.win>0?'+':''}${h.win}</span>
+    </div>`).join('');
+
+  updateBalance();
+  saveBalance();
+  document.getElementById('jackpot-amount').textContent = jackpot.toLocaleString('es-ES');
+  document.getElementById('spin-btn').disabled = false;
+}
+
+function saveBalance() {
+  const user = BetM8.getUser();
+  if (!user) return;
+  user.coins = balance;
+  BetM8.setUser(user);
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) {
+      const me = room.players.find(p => p.id === user.id);
+      if (me) { me.coins = balance; BetM8.updateRoom(roomId, { players: room.players }); }
+    }
+  }
+  BetM8.renderNavbar();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
