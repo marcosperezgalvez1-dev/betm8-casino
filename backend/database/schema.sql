@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    coins INT DEFAULT 1000,
+    coins INT DEFAULT 5000,
     xp INT DEFAULT 0,
     level INT DEFAULT 1,
     avatar VARCHAR(100) DEFAULT 'default',
