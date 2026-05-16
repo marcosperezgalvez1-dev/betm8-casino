@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baccarat — BetM8</title>
+<link rel="stylesheet" href="css/global.css">
+<style>
+body { background:#14110a; }
+.game-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; padding:20px 0 40px; align-items:start; }
+.bc-table {
+  background: radial-gradient(ellipse at 50% 40%, #2d2a0f 0%, #1a1808 60%, #0a0905 100%);
+  border: 2px solid #4a4520;
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  position: relative;
+  min-height: 500px;
+}
+.bc-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 28px; }
+.bc-zone { text-align: center; }
+.bc-zone-label { font-family: var(--font-display); font-size: 0.85rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; }
+.bc-cards { display: flex; gap: 6px; justify-content: center; min-height: 100px; margin-bottom: 12px; }
+.bc-card {
+  width: 60px; height: 86px; background: #fff; border-radius: 6px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 5px 6px; font-size: 0.9rem; font-weight: 700;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.5);
+  position: relative; animation: cardDeal 0.3s ease;
+}
+@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.bc-card.red { color: #c00; }
+.bc-card .center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.2rem; }
+.bc-score {
+  background: rgba(0,0,0,0.5); border: 1px solid var(--gold-dark); border-radius: var(--radius-md);
+  padding: 6px 18px; font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--gold);
+  display: inline-block;
+}
+
+.bet-zones { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.bet-zone {
+  cursor: pointer;
+  border-radius: var(--radius-md); padding: 18px 12px; text-align: center;
+  border: 2px solid; transition: all 0.2s; position: relative;
+}
+.bet-zone:hover { filter: brightness(1.2); }
+.bet-zone.player { background: rgba(0,107,210,0.15); border-color: #006bd2; color: #4ab4ff; }
+.bet-zone.tie { background: rgba(13,110,74,0.15); border-color: #0d6e4a; color: #5fdf9d; }
+.bet-zone.banker { background: rgba(192,57,43,0.15); border-color: #c0392b; color: #ff7060; }
+.bet-zone-label { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+.bet-zone-payout { font-size: 0.78rem; opacity: 0.8; }
+.bet-zone-chip { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: #000; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border: 2px solid #fff; pointer-events: none; }
+
+.controls { display:flex; gap:14px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top: 20px; }
+.chip-row-bc { display: flex; gap: 6px; }
+.chip-bc {
+  width: 42px; height: 42px; border-radius: 50%; border: 2px solid; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.7rem; font-weight: 700;
+  background: rgba(0,0,0,0.4); transition: transform 0.15s;
+}
+.chip-bc.selected { box-shadow: 0 0 12px currentColor; transform: scale(1.1); }
+.side-panel { display:flex; flex-direction:column; gap:16px; }
+.info-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.scoreboard { display: flex; gap: 4px; flex-wrap: wrap; }
+.sb-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #fff; }
+.sb-dot.P { background: #006bd2; }
+.sb-dot.B { background: #c0392b; }
+.sb-dot.T { background: #0d6e4a; }
+@media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav class="navbar" id="betm8-nav"></nav>
+<div class="container">
+<div style="padding:16px 0 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
+<div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">🎴 Baccarat</div>
+<div id="room-info-bar" style="margin-left:auto"></div>
+</div>
+
+<div class="game-layout">
+<div>
+<div class="bc-table">
+<div class="bc-zones">
+<div class="bc-zone">
+<div class="bc-zone-label">Player</div>
+<div class="bc-cards" id="player-cards"></div>
+<div class="bc-score" id="player-score">—</div>
+</div>
+<div class="bc-zone">
+<div class="bc-zone-label">Banker</div>
+<div class="bc-cards" id="banker-cards"></div>
+<div class="bc-score" id="banker-score">—</div>
+</div>
+</div>
+
+<div class="bet-zones">
+<div class="bet-zone player" id="bet-player" onclick="bet('player')">
+<div class="bet-zone-label">PLAYER</div>
+<div class="bet-zone-payout">Paga 1:1</div>
+</div>
+<div class="bet-zone tie" id="bet-tie" onclick="bet('tie')">
+<div class="bet-zone-label">TIE</div>
+<div class="bet-zone-payout">Paga 8:1</div>
+</div>
+<div class="bet-zone banker" id="bet-banker" onclick="bet('banker')">
+<div class="bet-zone-label">BANKER</div>
+<div class="bet-zone-payout">Paga 0.95:1</div>
+</div>
+</div>
+
+<div class="controls">
+<div>
+<div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Ficha</div>
+<div class="chip-row-bc">
+<button class="chip-bc selected" style="border-color:#e74c3c;color:#e74c3c" onclick="selChip(10,this)">10</button>
+<button class="chip-bc" style="border-color:#3498db;color:#3498db" onclick="selChip(50,this)">50</button>
+<button class="chip-bc" style="border-color:var(--gold);color:var(--gold)" onclick="selChip(100,this)">100</button>
+<button class="chip-bc" style="border-color:#9b59b6;color:#9b59b6" onclick="selChip(500,this)">500</button>
+</div>
+</div>
+<div style="font-family:var(--font-display);font-size:1.1rem;color:var(--gold);font-weight:700">Apuesta: ◈ <span id="bet-display">0</span></div>
+<button class="btn btn-ghost btn-sm" onclick="clearBet()">Limpiar</button>
+<button class="btn btn-primary" onclick="deal()">Repartir</button>
+</div>
+</div>
+</div>
+
+<div class="side-panel">
+<div class="info-card">
+<div class="info-card-title">Tus fichas</div>
+<div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)">◈ <span id="balance-display">0</span></div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Marcador</div>
+<div class="scoreboard" id="scoreboard"></div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Reglas</div>
+<div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6">
+La mano más cercana a 9 gana. Las cartas 10-K valen 0, el As vale 1.
+</div>
+</div>
+<a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
+</div>
+</div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+const SUITS=['♠','♥','♦','♣']; const VALUES=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RED=new Set(['♥','♦']);
+let deck=[], balance=0, currentBet=0, betType=null, chipValue=10;
+const scoreboard = [];
+
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room');
+
+function init() {
+  const user = BetM8.getUser();
+  balance = user ? (user.coins || 1000) : 1000;
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) {
+      const me = room.players.find(p => p.id === user?.id);
+      if (me) balance = me.coins || balance;
+      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.name}</span>`;
+      if (room.hostId === user?.id) { const hl = document.getElementById('host-link'); hl.href = 'gestion-sala.html?room='+roomId; hl.style.display='block'; }
+    }
+  }
+  updateBalance();
+}
+
+function buildDeck() {
+  deck = [];
+  for (const s of SUITS) for (const v of VALUES) deck.push({s,v});
+  for (let i=deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+}
+function cardVal(c) { if (['10','J','Q','K'].includes(c.v)) return 0; if (c.v === 'A') return 1; return parseInt(c.v); }
+function handVal(h) { return h.reduce((s,c) => (s + cardVal(c)) % 10, 0); }
+
+function selChip(v, btn) {
+  chipValue = v;
+  document.querySelectorAll('.chip-bc').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function bet(type) {
+  if (chipValue > balance) { BetM8.toast('Fichas insuficientes','warning'); return; }
+  if (betType && betType !== type) { BetM8.toast('Limpia tu apuesta primero','warning'); return; }
+  balance -= chipValue;
+  currentBet += chipValue;
+  betType = type;
+  updateBalance();
+  document.getElementById('bet-display').textContent = currentBet;
+  const zone = document.getElementById('bet-' + type);
+  let chip = zone.querySelector('.bet-zone-chip');
+  if (!chip) { chip = document.createElement('div'); chip.className = 'bet-zone-chip'; zone.appendChild(chip); }
+  chip.textContent = currentBet;
+}
+
+function clearBet() {
+  balance += currentBet;
+  currentBet = 0; betType = null;
+  document.querySelectorAll('.bet-zone-chip').forEach(c => c.remove());
+  document.getElementById('bet-display').textContent = '0';
+  updateBalance();
+}
+
+function renderCard(c) {
+  const isRed = RED.has(c.s);
+  return `<div class="bc-card ${isRed?'red':''}">
+    <div>${c.v}${c.s}</div>
+    <div class="center">${c.s}</div>
+  </div>`;
+}
+
+function deal() {
+  if (currentBet === 0) { BetM8.toast('Haz una apuesta primero','warning'); return; }
+  buildDeck();
+  const player = [deck.pop(), deck.pop()];
+  const banker = [deck.pop(), deck.pop()];
+  if (handVal(player) <= 5) player.push(deck.pop());
+  if (handVal(banker) <= 5) banker.push(deck.pop());
+
+  document.getElementById('player-cards').innerHTML = player.map(renderCard).join('');
+  document.getElementById('banker-cards').innerHTML = banker.map(renderCard).join('');
+  const ps = handVal(player), bs = handVal(banker);
+  document.getElementById('player-score').textContent = ps;
+  document.getElementById('banker-score').textContent = bs;
+
+  let result = ps > bs ? 'player' : (bs > ps ? 'banker' : 'tie');
+  scoreboard.unshift(result === 'player' ? 'P' : result === 'banker' ? 'B' : 'T');
+  if (scoreboard.length > 24) scoreboard.pop();
+  document.getElementById('scoreboard').innerHTML = scoreboard.map(r => `<div class="sb-dot ${r}">${r}</div>`).join('');
+
+  let win = 0;
+  if (result === betType) {
+    if (betType === 'player') win = currentBet * 2;
+    else if (betType === 'banker') win = Math.floor(currentBet * 1.95);
+    else win = currentBet * 9;
+    balance += win;
+    BetM8.toast('¡Ganas ◈' + win.toLocaleString('es-ES') + '!','success');
+  } else {
+    BetM8.toast('Pierdes','info');
+  }
+
+  currentBet = 0; betType = null;
+  document.querySelectorAll('.bet-zone-chip').forEach(c => c.remove());
+  document.getElementById('bet-display').textContent = '0';
+  updateBalance();
+  saveBalance();
+}
+
+function updateBalance() { document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES'); }
+function saveBalance() {
+  const user = BetM8.getUser(); if (!user) return;
+  user.coins = balance; BetM8.setUser(user);
+  if (roomId) { const room = BetM8.getRoom(roomId); if (room) { const me = room.players.find(p=>p.id===user.id); if (me) { me.coins=balance; BetM8.updateRoom(roomId,{players:room.players}); } } }
+  BetM8.renderNavbar();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
