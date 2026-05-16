@@ -196,16 +196,19 @@ const PIPS = {
 const params = new URLSearchParams(window.location.search);
 const roomId = params.get('room');
 
-function init() {
+async function init() {
   const user = BetM8.getUser();
   balance = user ? (user.coins || 1000) : 1000;
   if (roomId) {
-    const room = BetM8.getRoom(roomId);
+    // Intentamos API, si falla usamos localStorage
+    const room = await BetM8.getRoom(roomId);
     if (room) {
-      const me = room.players.find(p => p.id === user?.id);
-      if (me) balance = me.coins || balance;
-      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.name}</span>`;
-      if (room.hostId === user?.id) { const hl = document.getElementById('host-link'); hl.href = 'gestion-sala.html?room='+roomId; hl.style.display='block'; }
+      const jugadores = room.jugadores || room.players || [];
+      const me = jugadores.find(p => (p.usuario_id || p.id) === user?.id);
+      if (me) balance = me.fichas || me.coins || balance;
+      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.nombre || room.name}</span>`;
+      const hostId = room.host_id || room.hostId;
+      if (hostId === user?.id) { const hl = document.getElementById('host-link'); hl.href = 'gestion-sala.html?room='+roomId; hl.style.display='block'; }
     }
   }
   updateBalance();
@@ -305,10 +308,17 @@ function rollDice() {
 }
 
 function updateBalance() { document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES'); }
-function saveBalance() {
+async function saveBalance() {
   const user = BetM8.getUser(); if (!user) return;
   user.coins = balance; BetM8.setUser(user);
-  if (roomId) { const room = BetM8.getRoom(roomId); if (room) { const me = room.players.find(p=>p.id===user.id); if (me) { me.coins=balance; BetM8.updateRoom(roomId,{players:room.players}); } } }
+  if (roomId) {
+    const room = await BetM8.getRoom(roomId);
+    if (room) {
+      const jugadores = room.jugadores || room.players || [];
+      const me = jugadores.find(p => (p.usuario_id || p.id) === user.id);
+      if (me) { me.fichas = balance; me.coins = balance; BetM8.updateRoom(roomId, { players: jugadores }); }
+    }
+  }
   BetM8.renderNavbar();
 }
 document.addEventListener('DOMContentLoaded', init);

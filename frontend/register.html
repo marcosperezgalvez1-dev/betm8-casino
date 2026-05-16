@@ -309,7 +309,7 @@
       label.style.color = bar.style.background;
     }
 
-    function handleRegister(e) {
+    async function handleRegister(e) {
       e.preventDefault();
       const username = document.getElementById('reg-username').value.trim();
       const email = document.getElementById('reg-email').value.trim();
@@ -333,19 +333,18 @@
       btn.disabled = true;
       btn.textContent = 'Creando cuenta...';
 
-      setTimeout(() => {
-        const result = BetM8.registerUser({ username, email, password: pass });
-        if (result.ok) {
-          BetM8.setUser(result.user);
-          BetM8.toast('¡Cuenta creada! Bienvenido, ' + username + ' 🎉', 'success', 4000);
-          setTimeout(() => window.location.href = 'lobby.html', 800);
-        } else {
-          errEl.textContent = result.msg;
-          errEl.style.display = 'block';
-          btn.disabled = false;
-          btn.textContent = 'Crear cuenta y recibir fichas';
-        }
-      }, 700);
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.register({ username, email, password: pass });
+
+      if (result.ok) {
+        BetM8.toast('¡Cuenta creada! Bienvenido, ' + username + ' 🎉', 'success', 4000);
+        setTimeout(() => window.location.href = 'lobby.html', 800);
+      } else {
+        errEl.textContent = result.error || 'Error al crear la cuenta';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Crear cuenta y recibir fichas';
+      }
     }
   </script>
 </body>

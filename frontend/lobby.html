@@ -335,18 +335,21 @@
       renderRooms();
     }
 
-    function renderRooms() {
+    async function renderRooms() {
       const grid = document.getElementById('rooms-grid');
       const search = document.getElementById('search-input').value.toLowerCase();
       const game = document.getElementById('filter-game').value;
       const status = document.getElementById('filter-status').value;
 
-      let rooms = BetM8.getRooms().filter(r => {
-        if (search && !r.name.toLowerCase().includes(search) && !r.host.toLowerCase().includes(search)) return false;
-        if (game && r.game !== game) return false;
-        if (status && r.status !== status) return false;
-        if (typeFilter === 'public' && r.type !== 'public') return false;
-        if (typeFilter === 'private' && r.type !== 'private') return false;
+      // Intentamos API, si falla usamos localStorage
+      let rooms = await BetM8.getRoomsFromAPI({ game, status, search });
+      if (!rooms) rooms = BetM8.getRooms();
+
+      // Filtrar por tipo (público/privado) en el frontend
+      rooms = rooms.filter(r => {
+        const tipo = r.tipo || r.type;
+        if (typeFilter === 'public' && tipo !== 'publica' && tipo !== 'public') return false;
+        if (typeFilter === 'private' && tipo !== 'privada' && tipo !== 'private') return false;
         return true;
       });
 
@@ -363,68 +366,92 @@
       }
 
       grid.innerHTML = rooms.map(r => {
-        const full = r.players.length >= r.maxPlayers;
-        const statusBadge = r.status === 'playing'
+        // Compatibilidad con nombres de campo del backend y localStorage
+        const jugadores = r.jugadores_actuales || (r.jugadores || r.players || []).length;
+        const maxJugadores = r.max_jugadores || r.maxPlayers || 8;
+        const full = jugadores >= maxJugadores;
+        const estado = r.estado || r.status;
+        const tipo = r.tipo || r.type;
+        const juego = r.juego || r.game;
+        const nombre = r.nombre || r.name;
+        const host = r.host_username || r.host;
+        const fichas = r.fichas_inicio || r.startingCoins || 1000;
+        const creado = r.created_at || r.createdAt;
+
+        const statusBadge = estado === 'jugando' || estado === 'playing'
           ? '<span class="badge badge-red">En juego</span>'
           : '<span class="badge badge-green">Esperando</span>';
-        const typeBadge = r.type === 'private'
+        const typeBadge = tipo === 'privada' || tipo === 'private'
           ? '<span class="badge badge-purple">🔒 Privada</span>'
           : '<span class="badge badge-blue">Pública</span>';
-        const tournBadge = r.isTournament ? '<span class="badge badge-gold">Torneo</span>' : '';
+        const tournBadge = r.es_torneo || r.isTournament ? '<span class="badge badge-gold">Torneo</span>' : '';
 
-        const dots = Array.from({length: r.maxPlayers}, (_, i) =>
-          `<div class="player-dot ${i < r.players.length ? 'filled' : ''}"></div>`
+        const dots = Array.from({length: maxJugadores}, (_, i) =>
+          `<div class="player-dot ${i < jugadores ? 'filled' : ''}"></div>`
         ).join('');
 
-        const iconClass = 'icon-' + r.game;
+        const iconClass = 'icon-' + juego;
 
         return `<div class="room-card ${full ? 'full' : ''}" onclick="openJoinModal('${r.id}')">
           <div class="room-card-top">
-            <div class="room-game-icon ${iconClass}">${gameIcons[r.game] || '🎮'}</div>
+            <div class="room-game-icon ${iconClass}">${gameIcons[juego] || '🎮'}</div>
             <div class="room-card-info">
-              <div class="room-name">${r.name}</div>
-              <div class="room-host">Anfitrión: <span>${r.host}</span></div>
+              <div class="room-name">${nombre}</div>
+              <div class="room-host">Anfitrión: <span>${host}</span></div>
               <div class="room-card-badges">${statusBadge}${typeBadge}${tournBadge}</div>
             </div>
           </div>
           <div class="room-card-bottom">
             <div class="room-players">
               <div class="player-dots">${dots}</div>
-              <span>${r.players.length}/${r.maxPlayers}</span>
+              <span>${jugadores}/${maxJugadores}</span>
             </div>
-            <div class="room-coins">${BetM8.formatCoins(r.startingCoins || 1000)}</div>
-            <div class="room-time">${BetM8.timeAgo(r.createdAt)}</div>
+            <div class="room-coins">${BetM8.formatCoins(fichas)}</div>
+            <div class="room-time">${BetM8.timeAgo(creado)}</div>
           </div>
         </div>`;
       }).join('');
     }
 
-    function openJoinModal(roomId) {
+    async function openJoinModal(roomId) {
       const user = BetM8.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
 
-      const room = BetM8.getRoom(roomId);
+      // Intentamos API, si falla usamos localStorage
+      const room = await BetM8.getRoom(roomId);
       if (!room) return;
       selectedRoom = room;
 
-      document.getElementById('modal-icon').textContent = gameIcons[room.game] || '🎮';
-      document.getElementById('modal-title').textContent = room.name;
+      // Compatibilidad con nombres de campo del backend
+      const juego = room.juego || room.game;
+      const nombre = room.nombre || room.name;
+      const tipo = room.tipo || room.type;
+      const jugadores = room.jugadores || room.players || [];
+      const maxJugadores = room.max_jugadores || room.maxPlayers || 8;
+      const fichas = room.fichas_inicio || room.startingCoins || 1000;
+      const host = room.host_username || room.host;
+      const esPrivada = tipo === 'privada' || tipo === 'private';
+
+      document.getElementById('modal-icon').textContent = gameIcons[juego] || '🎮';
+      document.getElementById('modal-title').textContent = nombre;
       document.getElementById('modal-subtitle').textContent =
-        (room.type === 'private' ? '🔒 Sala privada · ' : 'Sala pública · ') + gameLabels[room.game];
-      document.getElementById('modal-pass-wrap').style.display = room.password ? 'block' : 'none';
+        (esPrivada ? '🔒 Sala privada · ' : 'Sala pública · ') + gameLabels[juego];
+      document.getElementById('modal-pass-wrap').style.display = esPrivada ? 'block' : 'none';
       document.getElementById('modal-pass').value = '';
 
-      const full = room.players.length >= room.maxPlayers;
+      const numJugadores = room.jugadores_actuales || jugadores.length;
+      const full = numJugadores >= maxJugadores;
+      const estado = room.estado || room.status;
       const btn = document.getElementById('modal-join-btn');
-      btn.disabled = full || room.status === 'playing';
-      btn.textContent = full ? 'Sala llena' : room.status === 'playing' ? 'Partida en curso' : 'Unirse';
+      btn.disabled = full || estado === 'jugando' || estado === 'playing';
+      btn.textContent = full ? 'Sala llena' : (estado === 'jugando' || estado === 'playing') ? 'Partida en curso' : 'Unirse';
 
       document.getElementById('modal-info').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between"><span>Jugadores</span><strong>${room.players.length}/${room.maxPlayers}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span>Fichas de inicio</span><strong style="color:var(--gold)">◈ ${BetM8.formatCoins(room.startingCoins || 1000)}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span>Anfitrión</span><strong>${room.host}</strong></div>
-          ${room.isTournament ? '<div style="color:var(--gold);font-size:0.8rem;margin-top:4px">🏆 Modo torneo activo</div>' : ''}
+          <div style="display:flex;justify-content:space-between"><span>Jugadores</span><strong>${numJugadores}/${maxJugadores}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Fichas de inicio</span><strong style="color:var(--gold)">◈ ${BetM8.formatCoins(fichas)}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Anfitrión</span><strong>${host}</strong></div>
+          ${room.es_torneo || room.isTournament ? '<div style="color:var(--gold);font-size:0.8rem;margin-top:4px">🏆 Modo torneo activo</div>' : ''}
         </div>`;
 
       document.getElementById('join-modal').classList.add('open');
@@ -435,29 +462,42 @@
       selectedRoom = null;
     }
 
-    function confirmJoin() {
+    async function confirmJoin() {
       if (!selectedRoom) return;
       const pass = document.getElementById('modal-pass').value;
-      const result = BetM8.joinRoom(selectedRoom.id, pass);
+
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.joinRoom(selectedRoom.id, pass);
+
       if (result.ok) {
-        BetM8.toast('Te has unido a ' + selectedRoom.name, 'success');
+        BetM8.toast('Te has unido a ' + (selectedRoom.nombre || selectedRoom.name), 'success');
         closeModal();
+        const juego = selectedRoom.juego || selectedRoom.game;
         const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
         setTimeout(() => {
-          window.location.href = (gamePages[selectedRoom.game] || 'lobby.html') + '?room=' + selectedRoom.id;
+          window.location.href = (gamePages[juego] || 'lobby.html') + '?room=' + selectedRoom.id;
         }, 500);
       } else {
-        BetM8.toast(result.msg, 'error');
+        BetM8.toast(result.error || result.msg || 'Error al unirse', 'error');
       }
     }
 
-    function joinByCode() {
+    async function joinByCode() {
       const code = document.getElementById('code-input').value.trim().toUpperCase();
       if (!code) { BetM8.toast('Introduce un código', 'warning'); return; }
       const user = BetM8.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
+
+      // Intentamos API, si falla buscamos en localStorage
+      const resultado = await BetM8.joinByCode(code);
+      if (resultado && resultado.ok && resultado.room) {
+        openJoinModal(resultado.room.id);
+        return;
+      }
+
+      // Fallback: buscar en localStorage
       const rooms = BetM8.getRooms();
-      const room = rooms.find(r => r.inviteCode === code || r.id.endsWith(code));
+      const room = rooms.find(r => r.codigo_inv === code || r.inviteCode === code || r.id.endsWith(code));
       if (!room) { BetM8.toast('Código no válido o sala no encontrada', 'error'); return; }
       openJoinModal(room.id);
     }

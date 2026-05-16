@@ -327,12 +327,13 @@
     const gameIcons  = { blackjack:'🃏', ruleta:'🎡', poker:'♠️', slots:'🎰', baccarat:'🎴', dados:'🎲' };
     const gameLabels = { blackjack:'Blackjack', ruleta:'Ruleta', poker:'Poker', slots:'Tragaperras', baccarat:'Baccarat', dados:'Dados' };
 
-    function loadRoom() {
+    async function loadRoom() {
       if (!roomId) { window.location.href = 'lobby.html'; return; }
-      room = BetM8.getRoom(roomId);
+      // Intentamos API, si falla usamos localStorage
+      room = await BetM8.getRoom(roomId);
       if (!room) { BetM8.toast('Sala no encontrada', 'error'); setTimeout(() => window.location.href = 'lobby.html', 1500); return; }
       const user = BetM8.getUser();
-      isHost = user && room.hostId === user.id;
+      isHost = user && (room.host_id === user.id || room.hostId === user.id);
       renderAll();
     }
 
@@ -340,43 +341,49 @@
       renderStatusBar();
       renderPlayers();
       renderChat();
-      if (room.inviteCode) {
+      if (room.codigo_inv || room.inviteCode) {
         document.getElementById('invite-box').style.display = 'flex';
-        document.getElementById('invite-code').textContent = room.inviteCode;
+        document.getElementById('invite-code').textContent = room.codigo_inv || room.inviteCode;
       }
-      if (room.isTournament) {
+      if (room.es_torneo || room.isTournament) {
         document.getElementById('tournament-panel').style.display = 'block';
       }
       document.getElementById('host-panel').style.display = isHost ? 'block' : 'none';
     }
 
     function renderStatusBar() {
-      document.getElementById('bar-icon').textContent = gameIcons[room.game] || '🎮';
-      document.getElementById('bar-name').textContent = room.name;
+      const juego = room.juego || room.game;
+      const nombre = room.nombre || room.name;
+      const estado = room.estado || room.status;
+      const jugadores = room.jugadores || room.players || [];
+      const maxJugadores = room.max_jugadores || room.maxPlayers || 8;
 
-      const statusBadge = room.status === 'playing'
+      document.getElementById('bar-icon').textContent = gameIcons[juego] || '🎮';
+      document.getElementById('bar-name').textContent = nombre;
+
+      const statusBadge = (estado === 'playing' || estado === 'jugando')
         ? '<span class="badge badge-red">En juego</span>'
-        : room.status === 'finished'
+        : (estado === 'finished' || estado === 'finalizada')
         ? '<span class="badge badge-gold">Finalizada</span>'
         : '<span class="badge badge-green">Esperando jugadores</span>';
 
       document.getElementById('bar-meta').innerHTML = `
         ${statusBadge}
-        <span class="badge badge-blue">${gameLabels[room.game] || room.game}</span>
-        ${room.isTournament ? '<span class="badge badge-gold">Torneo</span>' : ''}
-        <span style="font-size:0.82rem;color:var(--text-muted)">${room.players.length}/${room.maxPlayers} jugadores</span>
+        <span class="badge badge-blue">${gameLabels[juego] || juego}</span>
+        ${room.es_torneo || room.isTournament ? '<span class="badge badge-gold">Torneo</span>' : ''}
+        <span style="font-size:0.82rem;color:var(--text-muted)">${jugadores.length}/${maxJugadores} jugadores</span>
       `;
 
       const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
       document.getElementById('bar-controls').innerHTML = `
-        <a href="${gamePages[room.game] || 'lobby.html'}?room=${room.id}" class="btn btn-primary btn-sm">Ir al juego →</a>
+        <a href="${gamePages[juego] || 'lobby.html'}?room=${room.id}" class="btn btn-primary btn-sm">Ir al juego →</a>
         <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
       `;
 
       const startBtn = document.getElementById('btn-start');
       const pauseBtn = document.getElementById('btn-pause');
       if (startBtn) {
-        if (room.status === 'playing') {
+        if (estado === 'playing' || estado === 'jugando') {
           startBtn.style.display = 'none';
           pauseBtn.style.display = 'inline-flex';
         } else {
@@ -387,19 +394,23 @@
     }
 
     function renderPlayers() {
-      const sorted = [...room.players].sort((a, b) => (b.coins || 0) - (a.coins || 0));
-      const maxCoins = sorted[0]?.coins || 1;
+      const jugadores = room.jugadores || room.players || [];
+      const sorted = [...jugadores].sort((a, b) => (b.fichas || b.coins || 0) - (a.fichas || a.coins || 0));
+      const maxCoins = sorted[0]?.fichas || sorted[0]?.coins || 1;
       const user = BetM8.getUser();
 
-      document.getElementById('player-count-badge').textContent = room.players.length + ' jugadores';
-      document.getElementById('chat-online').textContent = room.players.length + ' en línea';
+      const hostId = room.host_id || room.hostId;
+      document.getElementById('player-count-badge').textContent = jugadores.length + ' jugadores';
+      document.getElementById('chat-online').textContent = jugadores.length + ' en línea';
 
       document.getElementById('players-list').innerHTML = sorted.map((p, i) => {
         const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
         const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-        const isMe = user && p.id === user.id;
-        const pIsHost = p.id === room.hostId;
-        const barPct = maxCoins > 0 ? Math.round((p.coins / maxCoins) * 100) : 0;
+        const pId = p.usuario_id || p.id;
+        const pCoins = p.fichas || p.coins || 0;
+        const isMe = user && pId === user.id;
+        const pIsHost = pId === hostId;
+        const barPct = maxCoins > 0 ? Math.round((pCoins / maxCoins) * 100) : 0;
 
         return `<div class="player-row">
           <div class="player-rank ${rankClass}">${rankLabel}</div>
@@ -408,74 +419,103 @@
             <div class="player-name">${p.username || 'Jugador'}${isMe ? ' <span style="color:var(--neon-blue);font-size:0.7rem">(tú)</span>' : ''}${pIsHost ? ' <span class="badge badge-gold" style="font-size:0.65rem;padding:2px 6px">Host</span>' : ''}</div>
             <div class="ranking-bar"><div class="ranking-bar-fill" style="width:${barPct}%"></div></div>
           </div>
-          <div class="player-coins">${(p.coins || 0).toLocaleString('es-ES')}</div>
+          <div class="player-coins">${pCoins.toLocaleString('es-ES')}</div>
           ${isHost && !pIsHost ? `<div class="player-actions">
-            <button class="btn btn-success btn-sm" title="Dar fichas" onclick="openGiveCoinsModal('${p.id}')">◈+</button>
-            <button class="btn btn-danger btn-sm" title="Expulsar" onclick="openKickModal('${p.id}', '${p.username}')">✕</button>
+            <button class="btn btn-success btn-sm" title="Dar fichas" onclick="openGiveCoinsModal('${pId}')">◈+</button>
+            <button class="btn btn-danger btn-sm" title="Expulsar" onclick="openKickModal('${pId}', '${p.username}')">✕</button>
           </div>` : ''}
         </div>`;
       }).join('');
 
       const sel = document.getElementById('give-player-select');
       if (sel) {
-        sel.innerHTML = room.players
-          .filter(p => p.id !== room.hostId)
-          .map(p => `<option value="${p.id}">${p.username}</option>`)
+        sel.innerHTML = jugadores
+          .filter(p => (p.usuario_id || p.id) !== hostId)
+          .map(p => `<option value="${p.usuario_id || p.id}">${p.username}</option>`)
           .join('') || '<option>No hay otros jugadores</option>';
       }
     }
 
-    function renderChat() {
-      const msgs = room.chatMessages || [];
+    async function renderChat() {
+      // Intentamos obtener mensajes de la API, si falla usamos localStorage
+      let msgs = await BetM8.getChat(roomId);
+      if (!msgs || msgs.length === 0) {
+        msgs = room.chatMessages || [];
+      }
       const container = document.getElementById('chat-messages');
       container.innerHTML = msgs.length === 0
         ? '<div class="chat-msg system"><div class="chat-msg-text">El chat de la sala está activo. ¡Saluda!</div></div>'
-        : msgs.map(m => m.system
-            ? `<div class="chat-msg system"><div class="chat-msg-text">${m.text}</div></div>`
-            : `<div class="chat-msg">
+        : msgs.map(m => {
+            if (m.system) return `<div class="chat-msg system"><div class="chat-msg-text">${m.text}</div></div>`;
+            // Compatibilidad: API usa username/mensaje/enviado_at, localStorage usa user/text/at
+            const nombre = m.username || m.user;
+            const texto = m.mensaje || m.text;
+            const tiempo = m.enviado_at || m.at;
+            return `<div class="chat-msg">
                 <div class="chat-msg-header">
-                  <span class="chat-msg-user">${m.user}</span>
-                  <span class="chat-msg-time">${BetM8.timeAgo(m.at)}</span>
+                  <span class="chat-msg-user">${nombre}</span>
+                  <span class="chat-msg-time">${BetM8.timeAgo(tiempo)}</span>
                 </div>
-                <div class="chat-msg-text">${m.text}</div>
-              </div>`
-          ).join('');
+                <div class="chat-msg-text">${texto}</div>
+              </div>`;
+          }).join('');
       container.scrollTop = container.scrollHeight;
     }
 
-    function sendChat() {
+    async function sendChat() {
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
       if (!text) return;
       const user = BetM8.getUser();
       if (!user) return;
-      room.chatMessages = room.chatMessages || [];
-      room.chatMessages.push({ user: user.username, text, at: new Date().toISOString() });
-      BetM8.updateRoom(room.id, { chatMessages: room.chatMessages });
       input.value = '';
-      renderChat();
+
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.sendChat(roomId, text);
+      if (result && result.ok) {
+        renderChat();
+      } else {
+        // Fallback a localStorage
+        room.chatMessages = room.chatMessages || [];
+        room.chatMessages.push({ user: user.username, text, at: new Date().toISOString() });
+        BetM8.updateRoom(room.id, { chatMessages: room.chatMessages });
+        renderChat();
+      }
     }
 
-    function startGame() {
-      BetM8.updateRoom(room.id, { status: 'playing' });
+    async function startGame() {
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.startGame(roomId);
+      if (!result || !result.ok) {
+        BetM8.updateRoom(room.id, { status: 'playing' });
+      }
       room.status = 'playing';
+      room.estado = 'jugando';
       addSystemMsg('🎮 El anfitrión ha iniciado la partida');
       renderAll();
       BetM8.toast('Partida iniciada', 'success');
     }
 
-    function pauseGame() {
-      BetM8.updateRoom(room.id, { status: 'waiting' });
+    async function pauseGame() {
+      const result = await BetM8.pauseGame(roomId);
+      if (!result || !result.ok) {
+        BetM8.updateRoom(room.id, { status: 'waiting' });
+      }
       room.status = 'waiting';
+      room.estado = 'esperando';
       addSystemMsg('⏸ El anfitrión ha pausado la partida');
       renderAll();
       BetM8.toast('Partida pausada', 'warning');
     }
 
-    function endGame() {
+    async function endGame() {
       if (!confirm('¿Finalizar y cerrar la sala?')) return;
-      BetM8.updateRoom(room.id, { status: 'finished' });
+      const result = await BetM8.endGame(roomId);
+      if (!result || !result.ok) {
+        BetM8.updateRoom(room.id, { status: 'finished' });
+      }
       room.status = 'finished';
+      room.estado = 'finalizada';
       addSystemMsg('⏹ La sala ha sido finalizada por el anfitrión');
       renderAll();
       BetM8.toast('Sala finalizada', 'info');
@@ -507,21 +547,36 @@
 
     function closeCoinsModal() { document.getElementById('coins-modal').classList.remove('open'); }
 
-    function giveCoins() {
+    async function giveCoins() {
       const sel = document.getElementById('give-player-select');
       const playerId = sel.value;
       const amount = parseInt(document.getElementById('give-amount').value);
       const reason = document.getElementById('give-reason').value.trim();
       if (!playerId || isNaN(amount) || amount <= 0) { BetM8.toast('Introduce una cantidad válida', 'warning'); return; }
-      const player = room.players.find(p => p.id === playerId);
-      if (!player) return;
-      player.coins = (player.coins || 0) + amount;
-      BetM8.updateRoom(room.id, { players: room.players });
-      addSystemMsg(`◈ ${amount.toLocaleString('es-ES')} fichas entregadas a ${player.username}${reason ? ' — ' + reason : ''}`);
-      room = BetM8.getRoom(room.id);
+
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.giveCoins(roomId, playerId, amount, reason || 'reparto');
+      if (!result || !result.ok) {
+        // Fallback localStorage
+        const players = room.jugadores || room.players || [];
+        const player = players.find(p => (p.usuario_id || p.id) === playerId);
+        if (player) {
+          player.fichas = (player.fichas || player.coins || 0) + amount;
+          player.coins = player.fichas;
+          BetM8.updateRoom(room.id, { players });
+        }
+      }
+
+      const players = room.jugadores || room.players || [];
+      const player = players.find(p => (p.usuario_id || p.id) === playerId);
+      const playerName = player ? player.username : 'Jugador';
+      addSystemMsg(`◈ ${amount.toLocaleString('es-ES')} fichas entregadas a ${playerName}${reason ? ' — ' + reason : ''}`);
+
+      // Recargar la sala
+      room = await BetM8.getRoom(roomId) || room;
       renderPlayers();
       closeCoinsModal();
-      BetM8.toast('Fichas entregadas a ' + player.username, 'success');
+      BetM8.toast('Fichas entregadas a ' + playerName, 'success');
     }
 
     function openKickModal(playerId, username) {
@@ -532,13 +587,21 @@
 
     function closeKickModal() { document.getElementById('kick-modal').classList.remove('open'); kickTargetId = null; }
 
-    function confirmKick() {
+    async function confirmKick() {
       if (!kickTargetId) return;
-      const player = room.players.find(p => p.id === kickTargetId);
-      room.players = room.players.filter(p => p.id !== kickTargetId);
-      BetM8.updateRoom(room.id, { players: room.players });
+      const players = room.jugadores || room.players || [];
+      const player = players.find(p => (p.usuario_id || p.id) === kickTargetId);
+
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.kickPlayer(roomId, kickTargetId);
+      if (!result || !result.ok) {
+        // Fallback localStorage
+        room.players = (room.players || []).filter(p => p.id !== kickTargetId);
+        BetM8.updateRoom(room.id, { players: room.players });
+      }
+
       if (player) addSystemMsg(`🚫 ${player.username} ha sido expulsado de la sala`);
-      room = BetM8.getRoom(room.id);
+      room = await BetM8.getRoom(roomId) || room;
       renderPlayers();
       closeKickModal();
       BetM8.toast('Jugador expulsado', 'info');
@@ -582,9 +645,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (!BetM8.getUser()) { window.location.href = 'login.html'; return; }
       loadRoom();
-      setInterval(() => {
-        room = BetM8.getRoom(roomId);
-        if (room) renderAll();
+      // Refrescar la sala periódicamente (intentamos API)
+      setInterval(async () => {
+        const updated = await BetM8.getRoom(roomId);
+        if (updated) { room = updated; renderAll(); }
       }, 5000);
     });
   </script>

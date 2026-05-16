@@ -241,6 +241,7 @@
   <script>
     if (BetM8.getUser()) window.location.href = 'lobby.html';
 
+    // Crear usuario demo en localStorage (fallback sin backend)
     (function() {
       const users = BetM8.getUsers();
       if (!users.find(u => u.username === 'demo')) {
@@ -248,7 +249,7 @@
       }
     })();
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const userVal = document.getElementById('login-user').value.trim();
       const passVal = document.getElementById('login-pass').value;
@@ -259,18 +260,18 @@
       btn.textContent = 'Verificando...';
       errEl.style.display = 'none';
 
-      setTimeout(() => {
-        const result = BetM8.loginUser(userVal, passVal);
-        if (result.ok) {
-          BetM8.toast('¡Bienvenido, ' + result.user.username + '!', 'success');
-          setTimeout(() => window.location.href = 'lobby.html', 600);
-        } else {
-          errEl.textContent = result.msg;
-          errEl.style.display = 'block';
-          btn.disabled = false;
-          btn.textContent = 'Entrar al casino';
-        }
-      }, 600);
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.login(userVal, passVal);
+
+      if (result.ok) {
+        BetM8.toast('¡Bienvenido, ' + result.user.username + '!', 'success');
+        setTimeout(() => window.location.href = 'lobby.html', 600);
+      } else {
+        errEl.textContent = result.error || 'Credenciales incorrectas';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Entrar al casino';
+      }
     }
   </script>
 </body>

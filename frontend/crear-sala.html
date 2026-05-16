@@ -498,7 +498,7 @@
       }
     }
 
-    function handleCreate(e) {
+    async function handleCreate(e) {
       e.preventDefault();
       const user = BetM8.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
@@ -513,28 +513,32 @@
       btn.disabled = true;
       btn.textContent = 'Creando sala...';
 
-      const inviteCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      // Intentamos API, si falla usamos localStorage
+      const result = await BetM8.createRoom({
+        nombre: name,
+        juego: selectedGame,
+        tipo: selectedType === 'public' ? 'publica' : 'privada',
+        password,
+        max_jugadores: parseInt(document.getElementById('room-maxplayers').value),
+        fichas_inicio: parseInt(document.getElementById('coins-slider').value),
+        es_torneo: document.getElementById('room-tournament').value === '1',
+      });
 
-      setTimeout(() => {
-        const room = BetM8.createRoom({
-          name,
-          game: selectedGame,
-          gameLabel: gameLabels[selectedGame],
-          type: selectedType === 'public' ? 'public' : 'private',
-          password,
-          maxPlayers: parseInt(document.getElementById('room-maxplayers').value),
-          startingCoins: parseInt(document.getElementById('coins-slider').value),
-          economy: selectedEconomy,
-          isTournament: document.getElementById('room-tournament').value === '1',
-          inviteCode,
-        });
-
+      if (result && result.ok && result.room) {
         BetM8.toast('¡Sala "' + name + '" creada!', 'success');
-
         setTimeout(() => {
-          window.location.href = 'gestion-sala.html?room=' + room.id;
+          window.location.href = 'gestion-sala.html?room=' + result.room.id;
         }, 600);
-      }, 700);
+      } else if (result && result.error) {
+        BetM8.toast(result.error, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Crear sala y entrar';
+      } else {
+        BetM8.toast('¡Sala "' + name + '" creada!', 'success');
+        setTimeout(() => {
+          window.location.href = 'lobby.html';
+        }, 600);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
