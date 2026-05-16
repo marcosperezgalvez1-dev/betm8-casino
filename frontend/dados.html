@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dados — BetM8</title>
+<link rel="stylesheet" href="css/global.css">
+<style>
+body { background:#081414; }
+.game-layout { display:grid; grid-template-columns:1fr 300px; gap:20px; padding:20px 0 40px; align-items:start; }
+.dice-area {
+  background: radial-gradient(ellipse at 50% 40%, #0f2a2a 0%, #081818 60%, #050d0d 100%);
+  border: 2px solid #1a4040;
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  text-align: center;
+  min-height: 480px;
+}
+
+.dice-stage {
+  display: flex; gap: 30px; justify-content: center; align-items: center;
+  min-height: 140px;
+  margin-bottom: 28px;
+}
+
+.dice {
+  width: 90px; height: 90px;
+  background: #fff;
+  border-radius: 14px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 -4px 8px rgba(0,0,0,0.1);
+  transition: transform 1s cubic-bezier(0.17, 0.67, 0.21, 1);
+}
+.dice .pip {
+  width: 12px; height: 12px;
+  background: #111;
+  border-radius: 50%;
+  align-self: center;
+  justify-self: center;
+}
+
+.total-display {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,168,67,0.4);
+  margin-bottom: 10px;
+}
+.total-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; }
+
+.point-marker {
+  display: inline-block;
+  background: rgba(212,168,67,0.1);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-md);
+  padding: 6px 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+.point-marker strong { color: var(--gold); }
+
+.dice-bets {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  max-width: 520px; margin: 0 auto;
+}
+.dice-bet {
+  background: rgba(0,0,0,0.4);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  position: relative;
+}
+.dice-bet:hover { border-color: var(--gold-dark); background: rgba(212,168,67,0.05); }
+.dice-bet.selected { border-color: var(--gold); background: var(--gold-glow); }
+.dice-bet h4 { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 3px; color: #fff; }
+.dice-bet p { font-size: 0.75rem; color: var(--text-muted); }
+.dice-bet .ratio { color: var(--gold); font-weight: 700; }
+.dice-bet-chip { position: absolute; top: 8px; right: 8px; background: var(--gold); color: #000; font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; }
+
+.controls-strip {
+  display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap;
+  margin-top: 20px;
+}
+.chip-row-d { display: flex; gap: 6px; }
+.chip-d {
+  width: 42px; height: 42px; border-radius: 50%; border: 2px solid; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.7rem; font-weight: 700;
+  background: rgba(0,0,0,0.4); transition: transform 0.15s;
+}
+.chip-d.selected { box-shadow: 0 0 12px currentColor; transform: scale(1.1); }
+.side-panel { display:flex; flex-direction:column; gap:16px; }
+.info-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+@media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } .dice-bets { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav class="navbar" id="betm8-nav"></nav>
+<div class="container">
+<div style="padding:16px 0 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
+<div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">🎲 Dados (Craps)</div>
+<div id="room-info-bar" style="margin-left:auto"></div>
+</div>
+
+<div class="game-layout">
+<div>
+<div class="dice-area">
+<div class="dice-stage">
+<div class="dice" id="dice-0"></div>
+<div class="dice" id="dice-1"></div>
+</div>
+<div class="total-display" id="total-display">—</div>
+<div class="total-label">Suma de los dados</div>
+
+<div class="point-marker" id="point-marker" style="margin-top:14px">
+Punto: <strong id="point-value">—</strong>
+</div>
+
+<div class="dice-bets">
+<div class="dice-bet" data-bet="pass" onclick="selectBet('pass')">
+<h4>Pass Line</h4>
+<p>Gana si sale 7 u 11. Pierde si sale 2,3,12. <span class="ratio">1:1</span></p>
+</div>
+<div class="dice-bet" data-bet="dontpass" onclick="selectBet('dontpass')">
+<h4>Don't Pass</h4>
+<p>Gana si sale 2 o 3. Pierde si sale 7 u 11. <span class="ratio">1:1</span></p>
+</div>
+<div class="dice-bet" data-bet="any7" onclick="selectBet('any7')">
+<h4>Any 7</h4>
+<p>Gana si la suma es 7. <span class="ratio">4:1</span></p>
+</div>
+<div class="dice-bet" data-bet="any11" onclick="selectBet('any11')">
+<h4>Any 11</h4>
+<p>Gana si la suma es 11. <span class="ratio">15:1</span></p>
+</div>
+<div class="dice-bet" data-bet="craps" onclick="selectBet('craps')">
+<h4>Craps (2,3,12)</h4>
+<p>Gana si sale 2, 3 o 12. <span class="ratio">7:1</span></p>
+</div>
+<div class="dice-bet" data-bet="hardway" onclick="selectBet('hardway')">
+<h4>Hardway (dobles)</h4>
+<p>Gana si los dos dados son iguales. <span class="ratio">8:1</span></p>
+</div>
+</div>
+
+<div class="controls-strip">
+<div class="chip-row-d">
+<button class="chip-d selected" style="border-color:#e74c3c;color:#e74c3c" onclick="selChip(10,this)">10</button>
+<button class="chip-d" style="border-color:#3498db;color:#3498db" onclick="selChip(50,this)">50</button>
+<button class="chip-d" style="border-color:var(--gold);color:var(--gold)" onclick="selChip(100,this)">100</button>
+<button class="chip-d" style="border-color:#9b59b6;color:#9b59b6" onclick="selChip(500,this)">500</button>
+</div>
+<div style="font-family:var(--font-display);font-size:1.1rem;color:var(--gold);font-weight:700">Apuesta: ◈ <span id="bet-display">0</span></div>
+<button class="btn btn-ghost btn-sm" onclick="clearBet()">Limpiar</button>
+<button class="btn btn-primary" onclick="rollDice()">Lanzar dados</button>
+</div>
+</div>
+</div>
+
+<div class="side-panel">
+<div class="info-card">
+<div class="info-card-title">Tus fichas</div>
+<div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--gold)">◈ <span id="balance-display">0</span></div>
+</div>
+<div class="info-card">
+<div class="info-card-title">Tiradas recientes</div>
+<div id="rolls-history" style="font-size:0.82rem;color:var(--text-muted)">Sin tiradas aún</div>
+</div>
+<a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
+</div>
+</div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let balance = 0, currentBet = 0, betType = null, chipValue = 10, point = null;
+const history = [];
+const PIPS = {
+  1: [5],
+  2: [1,9],
+  3: [1,5,9],
+  4: [1,3,7,9],
+  5: [1,3,5,7,9],
+  6: [1,3,4,6,7,9],
+};
+
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room');
+
+function init() {
+  const user = BetM8.getUser();
+  balance = user ? (user.coins || 1000) : 1000;
+  if (roomId) {
+    const room = BetM8.getRoom(roomId);
+    if (room) {
+      const me = room.players.find(p => p.id === user?.id);
+      if (me) balance = me.coins || balance;
+      document.getElementById('room-info-bar').innerHTML = `<span class="badge badge-blue">${room.name}</span>`;
+      if (room.hostId === user?.id) { const hl = document.getElementById('host-link'); hl.href = 'gestion-sala.html?room='+roomId; hl.style.display='block'; }
+    }
+  }
+  updateBalance();
+  renderDice(1, 1);
+}
+
+function renderDice(a, b) {
+  [a,b].forEach((n, i) => {
+    const d = document.getElementById('dice-' + i);
+    const positions = PIPS[n];
+    let html = '';
+    for (let p = 1; p <= 9; p++) {
+      html += positions.includes(p) ? '<div class="pip"></div>' : '<div></div>';
+    }
+    d.innerHTML = html;
+  });
+}
+
+function selChip(v, btn) {
+  chipValue = v;
+  document.querySelectorAll('.chip-d').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectBet(type) {
+  if (betType && betType !== type) { BetM8.toast('Limpia tu apuesta primero','warning'); return; }
+  if (chipValue > balance) { BetM8.toast('Fichas insuficientes','warning'); return; }
+  balance -= chipValue;
+  currentBet += chipValue;
+  betType = type;
+  updateBalance();
+  document.getElementById('bet-display').textContent = currentBet;
+  document.querySelectorAll('.dice-bet').forEach(b => b.classList.toggle('selected', b.dataset.bet === type));
+  let bet = document.querySelector(`.dice-bet[data-bet="${type}"]`);
+  let chip = bet.querySelector('.dice-bet-chip');
+  if (!chip) { chip = document.createElement('div'); chip.className = 'dice-bet-chip'; bet.appendChild(chip); }
+  chip.textContent = '◈' + currentBet;
+}
+
+function clearBet() {
+  balance += currentBet;
+  currentBet = 0; betType = null;
+  document.querySelectorAll('.dice-bet').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.dice-bet-chip').forEach(c => c.remove());
+  document.getElementById('bet-display').textContent = '0';
+  updateBalance();
+}
+
+function rollDice() {
+  if (currentBet === 0 || !betType) { BetM8.toast('Haz una apuesta primero','warning'); return; }
+  document.querySelectorAll('.dice').forEach(d => d.style.transform = `rotate(${Math.random()*1440-720}deg)`);
+  setTimeout(() => {
+    const a = Math.floor(Math.random()*6) + 1;
+    const b = Math.floor(Math.random()*6) + 1;
+    const sum = a + b;
+    renderDice(a, b);
+    document.querySelectorAll('.dice').forEach(d => d.style.transform = 'rotate(0)');
+    document.getElementById('total-display').textContent = sum;
+
+    history.unshift({a, b, sum});
+    if (history.length > 8) history.pop();
+    document.getElementById('rolls-history').innerHTML = history.map(h =>
+      `<div style="display:flex;justify-content:space-between;padding:3px 0">
+        <span>${h.a} + ${h.b}</span>
+        <span style="color:var(--gold);font-weight:600">${h.sum}</span>
+      </div>`).join('');
+
+    let win = 0;
+    if (betType === 'pass') {
+      if ([7,11].includes(sum)) win = currentBet * 2;
+      else if ([2,3,12].includes(sum)) win = 0;
+      else { point = sum; document.getElementById('point-value').textContent = sum; BetM8.toast('Punto establecido: ' + sum, 'info'); return; }
+    } else if (betType === 'dontpass') {
+      if ([2,3].includes(sum)) win = currentBet * 2;
+      else if ([7,11].includes(sum)) win = 0;
+      else if (sum === 12) win = currentBet;
+      else { point = sum; document.getElementById('point-value').textContent = sum; BetM8.toast('Punto establecido: ' + sum, 'info'); return; }
+    } else if (betType === 'any7') win = sum === 7 ? currentBet * 5 : 0;
+    else if (betType === 'any11') win = sum === 11 ? currentBet * 16 : 0;
+    else if (betType === 'craps') win = [2,3,12].includes(sum) ? currentBet * 8 : 0;
+    else if (betType === 'hardway') win = a === b ? currentBet * 9 : 0;
+
+    if (win > 0) {
+      balance += win;
+      BetM8.toast('¡Ganas ◈' + win.toLocaleString('es-ES') + '!','success');
+    } else {
+      BetM8.toast('Pierdes esta tirada','info');
+    }
+    currentBet = 0; betType = null; point = null;
+    document.getElementById('point-value').textContent = '—';
+    document.querySelectorAll('.dice-bet').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.dice-bet-chip').forEach(c => c.remove());
+    document.getElementById('bet-display').textContent = '0';
+    updateBalance();
+    saveBalance();
+  }, 900);
+}
+
+function updateBalance() { document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES'); }
+function saveBalance() {
+  const user = BetM8.getUser(); if (!user) return;
+  user.coins = balance; BetM8.setUser(user);
+  if (roomId) { const room = BetM8.getRoom(roomId); if (room) { const me = room.players.find(p=>p.id===user.id); if (me) { me.coins=balance; BetM8.updateRoom(roomId,{players:room.players}); } } }
+  BetM8.renderNavbar();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
