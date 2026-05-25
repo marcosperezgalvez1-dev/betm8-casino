@@ -75,21 +75,6 @@
     }
     .wheel-number.green-num { color: #111; }
 
-    .wheel-center {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70px; height: 70px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #000;
-      border: 3px solid #6a4a1a;
-      z-index: 3;
-    }
 
     .live-counter {
       text-align: center;
@@ -306,7 +291,6 @@
             <div style="position:relative;display:inline-block">
               <div class="wheel-pointer"></div>
               <div class="wheel" id="wheel">
-                <div class="wheel-center" id="wheel-center">—</div>
               </div>
             </div>
             <div class="last-result">
@@ -546,9 +530,6 @@
         const counter = document.getElementById('live-counter');
         counter.textContent = result;
         counter.style.background = colorOf(result) === 'red' ? '#c0392b' : colorOf(result) === 'green' ? '#0d6e4a' : '#1a1a1a';
-        document.getElementById('wheel-center').textContent = result;
-        document.getElementById('wheel-center').style.background = colorOf(result) === 'red' ? '#c0392b' : colorOf(result) === 'black' ? '#1a1a1a' : '#0d6e4a';
-        document.getElementById('wheel-center').style.color = '#fff';
 
         const lastNumEl = document.getElementById('last-num');
         lastNumEl.textContent = result;
