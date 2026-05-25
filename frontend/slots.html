@@ -68,19 +68,35 @@ body { background:#0f0815; }
   flex-shrink: 0;
 }
 
-.payline-info {
-  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
+.paytable {
+  max-width: 320px;
+  margin: 0 auto 20px;
+  border-collapse: collapse;
 }
-.payline-row {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 5px 11px;
-  font-size: 0.78rem;
+.paytable-title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.paytable td {
+  padding: 5px 14px;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.payline-row strong { color: var(--gold); }
+.paytable td:first-child { text-align: left; }
+.paytable td:last-child { text-align: right; font-family: var(--font-display); font-weight: 700; color: var(--gold); }
+.paytable tr.jackpot-row td {
+  color: var(--gold);
+  background: rgba(212,168,67,0.08);
+  border-bottom: 1px solid rgba(212,168,67,0.25);
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(212,168,67,0.4);
+}
 
 .bet-controls {
   display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap;
@@ -179,14 +195,16 @@ body { background:#0f0815; }
 <div class="reel"><div class="reel-strip" id="reel-2"></div></div>
 </div>
 
-<div class="payline-info">
-<div class="payline-row">7️⃣7️⃣7️⃣ <strong>×100</strong></div>
-<div class="payline-row">💎💎💎 <strong>×50</strong></div>
-<div class="payline-row">🔔🔔🔔 <strong>×20</strong></div>
-<div class="payline-row">🍒🍒🍒 <strong>×10</strong></div>
-<div class="payline-row">🍋🍋🍋 <strong>×5</strong></div>
-<div class="payline-row">2 iguales <strong>×2</strong></div>
-</div>
+<div class="paytable-title">Tabla de pagos</div>
+<table class="paytable">
+<tr class="jackpot-row"><td>7️⃣7️⃣7️⃣</td><td>×100</td></tr>
+<tr><td>💎💎💎</td><td>×50</td></tr>
+<tr><td>🔔🔔🔔</td><td>×20</td></tr>
+<tr><td>⭐⭐⭐</td><td>×15</td></tr>
+<tr><td>🍒🍒🍒</td><td>×10</td></tr>
+<tr><td>🍋🍋🍋</td><td>��5</td></tr>
+<tr><td>Dos iguales</td><td>×2</td></tr>
+</table>
 
 <div class="bet-controls">
 <div class="bet-display-slots">
