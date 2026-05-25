@@ -21,14 +21,14 @@ body { background:#14110a; }
 .bc-zone-label { font-family: var(--font-display); font-size: 0.85rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; }
 .bc-cards { display: flex; gap: 6px; justify-content: center; min-height: 100px; margin-bottom: 12px; }
 .bc-card {
-  width: 60px; height: 86px; background: #fff; border-radius: 6px;
+  width: 60px; height: 86px; background: #fff; color: #111; border-radius: 6px;
   display: flex; flex-direction: column; justify-content: space-between;
   padding: 5px 6px; font-size: 0.9rem; font-weight: 700;
   box-shadow: 2px 3px 8px rgba(0,0,0,0.5);
   position: relative; animation: cardDeal 0.3s ease;
 }
-@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.bc-card.red { color: #c00; }
+@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); } to { transform: scale(1); } }
+.bc-card.red { color: #cc0000; }
 .bc-card .center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.2rem; }
 .bc-score {
   background: rgba(0,0,0,0.5); border: 1px solid var(--gold-dark); border-radius: var(--radius-md);
