@@ -133,6 +133,21 @@ body { background:#0f0815; }
   cursor: pointer;
   font-weight: 700;
 }
+.bet-input {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-sm);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  width: 80px;
+  padding: 4px 8px;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.bet-input::-webkit-outer-spin-button,
+.bet-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .spin-btn-big {
   font-family: var(--font-display);
@@ -221,7 +236,7 @@ body { background:#0f0815; }
 <div class="bet-controls">
 <div class="bet-display-slots">
 <button class="bet-step-btn" onclick="changeBet(-10)">−</button>
-APUESTA: ◈ <span id="bet-display">10</span>
+APUESTA: ◈ <input type="number" class="bet-input" id="bet-input" value="10" min="10" max="1000" step="10" onchange="onBetInput()">
 <button class="bet-step-btn" onclick="changeBet(10)">+</button>
 </div>
 <button class="spin-btn-big" id="spin-btn" onclick="spinReels()">GIRAR</button>
@@ -296,12 +311,25 @@ function buildReels() {
 }
 
 function changeBet(delta) {
-  bet = Math.max(10, Math.min(1000, bet + delta));
-  document.getElementById('bet-display').textContent = bet;
+  bet = Math.max(10, Math.min(balance, bet + delta));
+  document.getElementById('bet-input').value = bet;
+}
+
+function onBetInput() {
+  const input = document.getElementById('bet-input');
+  let val = parseInt(input.value, 10);
+  if (isNaN(val) || val < 10) val = 10;
+  if (val > balance) val = balance;
+  val = Math.round(val / 10) * 10;
+  bet = val;
+  input.value = bet;
 }
 
 function updateBalance() {
   document.getElementById('balance-display').textContent = balance.toLocaleString('es-ES');
+  const input = document.getElementById('bet-input');
+  input.max = balance;
+  if (bet > balance) { bet = Math.max(10, balance); input.value = bet; }
 }
 
 function spinReels() {
