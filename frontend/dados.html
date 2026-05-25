@@ -100,6 +100,58 @@ body { background:#081414; }
 .info-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
 .info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
 @media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } .dice-bets { grid-template-columns: 1fr; } }
+.help-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.help-btn:hover { background: var(--gold-glow); }
+.help-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 300;
+}
+.help-modal-overlay.show { display: flex; }
+.help-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  max-width: 480px;
+  width: 90%;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.help-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.help-modal-body {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.help-modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.help-modal-close:hover { color: #fff; }
 </style>
 </head>
 <body>
@@ -109,6 +161,7 @@ body { background:#081414; }
 <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
 <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">🎲 Dados (Craps)</div>
 <div id="room-info-bar" style="margin-left:auto"></div>
+<button class="help-btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
 </div>
 
 <div class="game-layout">
@@ -177,6 +230,14 @@ Punto: <strong id="point-value">—</strong>
 </div>
 <a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
 </div>
+</div>
+</div>
+
+<div class="help-modal-overlay" id="help-modal">
+<div class="help-modal">
+<button class="help-modal-close" onclick="document.getElementById('help-modal').classList.remove('show')">&times;</button>
+<div class="help-modal-title">Cómo jugar — Dados (Craps)</div>
+<div class="help-modal-body">Lanza dos dados y apuesta al resultado. Pass Line gana con 7 u 11, pierde con 2, 3 o 12. Don't Pass es lo contrario. Any 7 gana si sale 7 (paga 4:1). Any 11 gana si sale 11 (paga 15:1). Craps gana con 2, 3 o 12 (paga 7:1). Hardway gana si los dos dados son iguales (paga 8:1).</div>
 </div>
 </div>
 
@@ -322,6 +383,10 @@ async function saveBalance() {
   BetM8.renderNavbar();
 }
 document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('help-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
 </script>
 </body>
 </html>

@@ -67,6 +67,58 @@ body { background:#14110a; }
 .sb-dot.B { background: #c0392b; }
 .sb-dot.T { background: #0d6e4a; }
 @media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
+.help-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.help-btn:hover { background: var(--gold-glow); }
+.help-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 300;
+}
+.help-modal-overlay.show { display: flex; }
+.help-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  max-width: 480px;
+  width: 90%;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.help-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.help-modal-body {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.help-modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.help-modal-close:hover { color: #fff; }
 </style>
 </head>
 <body>
@@ -76,6 +128,7 @@ body { background:#14110a; }
 <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
 <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">🎴 Baccarat</div>
 <div id="room-info-bar" style="margin-left:auto"></div>
+<button class="help-btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
 </div>
 
 <div class="game-layout">
@@ -143,6 +196,14 @@ La mano más cercana a 9 gana. Las cartas 10-K valen 0, el As vale 1.
 </div>
 <a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
 </div>
+</div>
+</div>
+
+<div class="help-modal-overlay" id="help-modal">
+<div class="help-modal">
+<button class="help-modal-close" onclick="document.getElementById('help-modal').classList.remove('show')">&times;</button>
+<div class="help-modal-title">Cómo jugar — Baccarat</div>
+<div class="help-modal-body">Apuesta a Player, Banker o Tie antes de repartir. Se reparten 2 cartas a cada lado, gana el más cercano a 9. Las figuras y el 10 valen 0, el As vale 1. Si la suma supera 9 se resta 10. Player paga 1:1, Banker paga 0.95:1, Tie paga 8:1.</div>
 </div>
 </div>
 
@@ -271,6 +332,10 @@ async function saveBalance() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('help-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
 </script>
 </body>
 </html>
