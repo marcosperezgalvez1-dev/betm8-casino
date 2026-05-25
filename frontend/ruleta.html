@@ -58,6 +58,23 @@
       transform: rotate(0deg);
     }
 
+    .wheel-number {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0; left: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 8px;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      pointer-events: none;
+    }
+    .wheel-number.green-num { color: #111; }
+
     .wheel-center {
       position: absolute;
       top: 50%; left: 50%;
@@ -71,6 +88,32 @@
       font-weight: 700;
       color: #000;
       border: 3px solid #6a4a1a;
+      z-index: 3;
+    }
+
+    .live-counter {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .live-counter-box {
+      display: inline-block;
+      min-width: 80px;
+      padding: 10px 24px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #fff;
+      background: #1a1a1a;
+      border: 2px solid var(--gold-dark);
+      transition: background 0.05s;
+    }
+    .live-counter-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
     }
 
     .wheel-pointer {
@@ -256,6 +299,10 @@
       <div>
         <div class="roulette-area">
           <div class="wheel-wrap">
+            <div class="live-counter">
+              <div class="live-counter-label">Casilla actual</div>
+              <div class="live-counter-box" id="live-counter">—</div>
+            </div>
             <div style="position:relative;display:inline-block">
               <div class="wheel-pointer"></div>
               <div class="wheel" id="wheel">
@@ -318,6 +365,50 @@
     // European roulette numbers
     const RED = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
     const colorOf = n => n === 0 ? 'green' : (RED.has(n) ? 'red' : 'black');
+    const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+    const SEG_DEG = 360 / 37;
+
+    function renderWheelNumbers() {
+      const wheel = document.getElementById('wheel');
+      WHEEL_ORDER.forEach((num, i) => {
+        const el = document.createElement('div');
+        el.className = 'wheel-number' + (num === 0 ? ' green-num' : '');
+        el.textContent = num;
+        el.style.transform = `rotate(${i * SEG_DEG + SEG_DEG / 2}deg)`;
+        wheel.appendChild(el);
+      });
+    }
+
+    let liveAnimId = null;
+    function startLiveCounter() {
+      const wheel = document.getElementById('wheel');
+      const counter = document.getElementById('live-counter');
+      function tick() {
+        const style = getComputedStyle(wheel);
+        const tr = style.transform;
+        let angle = 0;
+        if (tr && tr !== 'none') {
+          const vals = tr.match(/matrix\((.+)\)/);
+          if (vals) {
+            const parts = vals[1].split(',').map(Number);
+            angle = Math.atan2(parts[1], parts[0]) * (180 / Math.PI);
+          }
+        }
+        let normalized = ((angle % 360) + 360) % 360;
+        let idx = Math.floor(normalized / SEG_DEG);
+        if (idx >= 37) idx = 36;
+        const num = WHEEL_ORDER[idx];
+        counter.textContent = num;
+        const bg = colorOf(num) === 'red' ? '#c0392b' : colorOf(num) === 'green' ? '#0d6e4a' : '#1a1a1a';
+        counter.style.background = bg;
+        liveAnimId = requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    function stopLiveCounter() {
+      if (liveAnimId) { cancelAnimationFrame(liveAnimId); liveAnimId = null; }
+    }
 
     let balance = 0;
     let activeChip = 5;
@@ -349,6 +440,7 @@
       }
       updateBalance();
       buildBoard();
+      renderWheelNumbers();
     }
 
     function buildBoard() {
@@ -441,15 +533,19 @@
     function spin() {
       if (bets.length === 0) { BetM8.toast('Haz una apuesta primero', 'warning'); return; }
       const result = Math.floor(Math.random() * 37); // 0-36
-      const wheelOrder = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-      const idx = wheelOrder.indexOf(result);
-      const targetAngle = -(idx * (360/37));
+      const idx = WHEEL_ORDER.indexOf(result);
+      const targetAngle = -(idx * SEG_DEG + SEG_DEG / 2);
       lastWheelAngle += 360 * 5 + targetAngle;
       const wheel = document.getElementById('wheel');
       wheel.style.transform = `rotate(${lastWheelAngle}deg)`;
       document.getElementById('spin-btn').disabled = true;
+      startLiveCounter();
 
       setTimeout(() => {
+        stopLiveCounter();
+        const counter = document.getElementById('live-counter');
+        counter.textContent = result;
+        counter.style.background = colorOf(result) === 'red' ? '#c0392b' : colorOf(result) === 'green' ? '#0d6e4a' : '#1a1a1a';
         document.getElementById('wheel-center').textContent = result;
         document.getElementById('wheel-center').style.background = colorOf(result) === 'red' ? '#c0392b' : colorOf(result) === 'black' ? '#1a1a1a' : '#0d6e4a';
         document.getElementById('wheel-center').style.color = '#fff';
