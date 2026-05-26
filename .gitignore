@@ -20,3 +20,7 @@ node_modules/
 
 # Logs
 *.log
+
+# Archivos comprimidos
+*.rar
+*.zip
