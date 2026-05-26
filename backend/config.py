@@ -10,6 +10,10 @@ from dotenv import load_dotenv
 # Cargar variables de entorno desde .env (si existe el archivo)
 load_dotenv()
 
+# --- Elegir entre SQLite (PythonAnywhere gratis) o MySQL (local/pro) ---
+# Si USE_SQLITE=true se usa SQLite, que no necesita instalar nada extra.
+USE_SQLITE = os.getenv("USE_SQLITE", "false").lower() == "true"
+
 # --- Configuración de la base de datos MySQL ---
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_USER = os.getenv("DB_USER", "root")
