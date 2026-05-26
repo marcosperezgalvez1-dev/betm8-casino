@@ -107,3 +107,20 @@ CREATE TABLE IF NOT EXISTS mensajes_chat (
     FOREIGN KEY (sala_id) REFERENCES salas(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
+
+-- ============================================
+-- Tabla: estado_partida
+-- Guarda el estado en tiempo real de una partida
+-- multijugador. El campo estado es un JSON con
+-- toda la info necesaria (cartas, turnos, etc).
+-- ============================================
+CREATE TABLE IF NOT EXISTS estado_partida (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sala_id INT NOT NULL,
+    juego VARCHAR(20) NOT NULL,
+    estado JSON NOT NULL COMMENT 'Estado completo de la partida en JSON',
+    turno_usuario_id INT NULL COMMENT 'ID del jugador cuyo turno es ahora',
+    fase VARCHAR(30) DEFAULT 'esperando' COMMENT 'esperando, jugando, finalizada',
+    actualizado_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sala_id) REFERENCES salas(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
