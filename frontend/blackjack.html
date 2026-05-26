@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -290,74 +290,6 @@
     }
     .chat-box-input input:focus { outline: none; border-color: var(--gold-dark); }
 
-    /* Multijugador: zona de otros jugadores */
-    .mp-players {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 12px;
-    }
-    .mp-player-box {
-      background: rgba(0,0,0,0.4);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
-      text-align: center;
-      min-width: 120px;
-    }
-    .mp-player-box.active-turn {
-      border-color: var(--gold);
-      box-shadow: 0 0 12px rgba(212,168,67,0.3);
-    }
-    .mp-player-box.bust { opacity: 0.5; }
-    .mp-player-name {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-    .mp-player-status {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .mp-player-cards {
-      display: flex;
-      gap: 2px;
-      justify-content: center;
-    }
-    .mp-mini-card {
-      width: 28px; height: 40px;
-      background: #fff;
-      border-radius: 3px;
-      font-size: 0.55rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #ddd;
-    }
-    .mp-mini-card.red { color: #cc0000; }
-    .mp-mini-card.black { color: #111; }
-    .mp-turn-indicator {
-      text-align: center;
-      font-family: var(--font-display);
-      font-size: 0.85rem;
-      color: var(--gold);
-      padding: 8px;
-      background: rgba(212,168,67,0.08);
-      border-radius: var(--radius-sm);
-      margin-top: 8px;
-    }
-    .mp-start-btn {
-      display: block;
-      margin: 20px auto;
-      padding: 14px 32px;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-    }
-
     @media (max-width: 768px) {
       .game-layout { grid-template-columns: 1fr; }
     }
@@ -446,13 +378,6 @@
             <div class="bj-score" id="player-score">—</div>
           </div>
 
-          <!-- Zona multijugador: otros jugadores -->
-          <div id="mp-section" style="display:none">
-            <div class="bj-divider"></div>
-            <div class="mp-players" id="mp-players"></div>
-            <div class="mp-turn-indicator" id="mp-turn-indicator"></div>
-          </div>
-
           <!-- Result banner -->
           <div class="result-banner" id="result-banner">
             <div class="result-title" id="result-title">—</div>
@@ -460,9 +385,6 @@
             <button class="btn btn-primary btn-lg" onclick="newRound()">Nueva ronda</button>
           </div>
         </div>
-
-        <!-- Boton iniciar partida multijugador (solo host) -->
-        <button class="btn btn-primary mp-start-btn" id="mp-start-btn" style="display:none" onclick="iniciarPartidaMP()">Iniciar partida</button>
 
         <!-- Bet & Actions -->
         <div class="bet-panel" style="margin-top:16px">
@@ -524,7 +446,7 @@
 
   <script src="js/app.js"></script>
   <script>
-    // --- Estado del juego ---
+    // --- State ---
     const SUITS  = ['♠','♥','♦','♣'];
     const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
     const RED_SUITS = new Set(['♥','♦']);
@@ -535,40 +457,13 @@
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get('room');
 
-    // --- Variables multijugador ---
-    let modoMultijugador = false;
-    let pollingInterval = null;
-    let esHost = false;
-    let miId = null;
-    let jugadoresInfo = {};  // {id: {username, ...}}
-
-    // ============================================
-    // INICIALIZACION
-    // ============================================
     async function init() {
       const user = BetM8.getUser();
-      miId = user?.id;
       balance = user ? (user.coins || 1000) : 1000;
       updateBalanceDisplay();
 
       if (roomId) {
-        // Intentar conectar con la API para modo multijugador
-        try {
-          const resp = await fetch(`/api/games/blackjack/${roomId}/estado`, { credentials: 'include' });
-          const data = await resp.json();
-
-          if (data.ok) {
-            // La API responde: activar modo multijugador
-            modoMultijugador = true;
-            await iniciarModoMultijugador(user);
-            return;
-          }
-        } catch (e) {
-          // La API no responde: usar modo local con fallback
-          console.log('API no disponible, usando modo local');
-        }
-
-        // Fallback: modo local con datos de sala de localStorage
+        // Intentamos API, si falla usamos localStorage
         const room = await BetM8.getRoom(roomId);
         if (room) {
           const jugadores = room.jugadores || room.players || [];
@@ -588,349 +483,10 @@
       }
     }
 
-    // ============================================
-    // MODO MULTIJUGADOR
-    // ============================================
-    async function iniciarModoMultijugador(user) {
-      // Obtener info de la sala
-      const resp = await fetch(`/api/rooms/${roomId}`, { credentials: 'include' });
-      const data = await resp.json();
-
-      if (!data.ok) return;
-
-      const sala = data.sala || data;
-      const jugadores = sala.jugadores || [];
-      const nombre = sala.nombre || '';
-
-      // Guardar info de jugadores para mostrar nombres
-      jugadores.forEach(j => {
-        jugadoresInfo[j.usuario_id] = j;
-      });
-
-      // Mostrar info de la sala
-      document.getElementById('room-info-bar').innerHTML = `
-        <span class="badge badge-blue">${nombre}</span>
-        <span class="badge badge-green">${jugadores.length} jugadores</span>`;
-
-      // Verificar si soy el host
-      esHost = sala.host_id === miId;
-      if (esHost) {
-        const hl = document.getElementById('host-link');
-        hl.href = 'gestion-sala.html?room=' + roomId;
-        hl.style.display = 'block';
-      }
-
-      // Obtener fichas del jugador en la sala
-      const me = jugadores.find(j => j.usuario_id === miId);
-      if (me) {
-        balance = me.fichas;
-        updateBalanceDisplay();
-      }
-
-      // Mostrar seccion multijugador
-      document.getElementById('mp-section').style.display = 'block';
-
-      // Comprobar estado actual de la partida
-      await actualizarEstadoMP();
-
-      // Iniciar polling cada 2 segundos
-      pollingInterval = setInterval(actualizarEstadoMP, 2000);
-    }
-
-    async function actualizarEstadoMP() {
-      // Polling: obtiene el estado actual del servidor y actualiza la UI
-      try {
-        const resp = await fetch(`/api/games/blackjack/${roomId}/estado`, { credentials: 'include' });
-        const data = await resp.json();
-
-        if (!data.ok) return;
-
-        const fase = data.fase;
-        const estado = data.estado;
-
-        if (!estado || fase === 'esperando') {
-          // No hay partida activa
-          mostrarEsperandoMP();
-          return;
-        }
-
-        if (fase === 'jugando') {
-          renderEstadoMP(estado, data.turno_usuario_id);
-        } else if (fase === 'finalizada') {
-          renderResultadoMP(estado);
-        }
-      } catch (e) {
-        console.log('Error en polling:', e);
-      }
-    }
-
-    function mostrarEsperandoMP() {
-      // Si soy host, mostrar boton de iniciar
-      if (esHost) {
-        document.getElementById('mp-start-btn').style.display = 'block';
-      }
-      document.getElementById('mp-turn-indicator').textContent = 'Esperando a que el host inicie la partida...';
-
-      // Ocultar controles de juego local
-      document.getElementById('deal-btn').style.display = 'none';
-      document.getElementById('hit-btn').style.display = 'none';
-      document.getElementById('stand-btn').style.display = 'none';
-      document.getElementById('double-btn').style.display = 'none';
-    }
-
-    async function iniciarPartidaMP() {
-      // Registrar apuesta antes de iniciar
-      if (bet <= 0) {
-        BetM8.toast('Haz una apuesta primero', 'warning');
-        return;
-      }
-
-      try {
-        // Enviar apuesta
-        await fetch(`/api/games/blackjack/${roomId}/apostar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ cantidad: bet })
-        });
-
-        // Iniciar la partida
-        const resp = await fetch(`/api/games/blackjack/${roomId}/iniciar`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        const data = await resp.json();
-
-        if (data.ok) {
-          document.getElementById('mp-start-btn').style.display = 'none';
-          BetM8.toast('Partida iniciada', 'success');
-          await actualizarEstadoMP();
-        } else {
-          BetM8.toast(data.error || 'Error al iniciar', 'error');
-        }
-      } catch (e) {
-        BetM8.toast('Error de conexion', 'error');
-      }
-    }
-
-    function renderEstadoMP(estado, turnoUsuarioId) {
-      // Ocultar boton de inicio
-      document.getElementById('mp-start-btn').style.display = 'none';
-
-      // Mostrar mano del crupier
-      const manoCrupier = estado.mano_crupier;
-      document.getElementById('dealer-cards').innerHTML = manoCrupier.map(c => {
-        if (c === '?') return '<div class="card card-back"></div>';
-        return renderCardFromString(c);
-      }).join('');
-
-      // Calcular score visible del crupier
-      if (manoCrupier[1] === '?') {
-        const primeraCarta = manoCrupier[0];
-        const valor = primeraCarta.slice(0, -1);
-        const puntos = ['J','Q','K'].includes(valor) ? 10 : valor === 'A' ? 11 : parseInt(valor);
-        document.getElementById('dealer-score').textContent = puntos;
-      } else {
-        document.getElementById('dealer-score').textContent = calcularValorManoLocal(manoCrupier);
-      }
-
-      // Mostrar mi mano
-      const miMano = estado.manos[String(miId)] || [];
-      document.getElementById('player-cards').innerHTML = miMano.map(c => renderCardFromString(c)).join('');
-      document.getElementById('player-score').textContent = calcularValorManoLocal(miMano) || '—';
-
-      // Mostrar manos de otros jugadores
-      renderOtrosJugadoresMP(estado, turnoUsuarioId);
-
-      // Mostrar indicador de turno
-      const nombreTurno = jugadoresInfo[turnoUsuarioId]?.username || 'Jugador';
-      const esMiTurno = turnoUsuarioId === miId;
-
-      if (esMiTurno) {
-        document.getElementById('mp-turn-indicator').textContent = '¡Es tu turno!';
-        document.getElementById('mp-turn-indicator').style.color = 'var(--neon-green)';
-      } else {
-        document.getElementById('mp-turn-indicator').textContent = `Turno de: ${nombreTurno}`;
-        document.getElementById('mp-turn-indicator').style.color = 'var(--gold)';
-      }
-
-      // Mostrar/ocultar botones segun si es mi turno
-      const miEstado = estado.estados_jugador[String(miId)];
-      const puedoJugar = esMiTurno && miEstado === 'jugando';
-
-      document.getElementById('deal-btn').style.display = 'none';
-      document.getElementById('hit-btn').style.display = puedoJugar ? '' : 'none';
-      document.getElementById('stand-btn').style.display = puedoJugar ? '' : 'none';
-      document.getElementById('double-btn').style.display = (puedoJugar && miMano.length === 2) ? '' : 'none';
-      document.querySelectorAll('.chip-btn').forEach(b => b.disabled = true);
-    }
-
-    function renderOtrosJugadoresMP(estado, turnoUsuarioId) {
-      const container = document.getElementById('mp-players');
-      let html = '';
-
-      for (const uid of estado.turno_orden) {
-        if (uid === miId) continue;  // No mostrarme a mi mismo aqui
-
-        const uidStr = String(uid);
-        const mano = estado.manos[uidStr] || [];
-        const estadoJugador = estado.estados_jugador[uidStr] || '';
-        const nombre = jugadoresInfo[uid]?.username || `Jugador ${uid}`;
-        const esTurno = uid === turnoUsuarioId;
-
-        let clases = 'mp-player-box';
-        if (esTurno) clases += ' active-turn';
-        if (estadoJugador === 'bust') clases += ' bust';
-
-        // Texto de estado
-        let statusTexto = '';
-        if (estadoJugador === 'bust') statusTexto = '💥 Bust';
-        else if (estadoJugador === 'plantado') statusTexto = '✋ Plantado';
-        else if (estadoJugador === 'blackjack') statusTexto = '🃏 Blackjack!';
-        else if (esTurno) statusTexto = '⏳ Jugando...';
-
-        html += `
-          <div class="${clases}">
-            <div class="mp-player-name">${nombre}</div>
-            <div class="mp-player-cards">
-              ${mano.map(c => renderMiniCard(c)).join('')}
-            </div>
-            <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:3px">
-              ${calcularValorManoLocal(mano) || '—'}
-            </div>
-            <div class="mp-player-status">${statusTexto}</div>
-          </div>`;
-      }
-
-      container.innerHTML = html;
-    }
-
-    function renderResultadoMP(estado) {
-      // Mostrar todas las cartas del crupier
-      document.getElementById('dealer-cards').innerHTML = estado.mano_crupier.map(c => renderCardFromString(c)).join('');
-      document.getElementById('dealer-score').textContent = calcularValorManoLocal(estado.mano_crupier);
-
-      // Mostrar mi mano
-      const miMano = estado.manos[String(miId)] || [];
-      document.getElementById('player-cards').innerHTML = miMano.map(c => renderCardFromString(c)).join('');
-      document.getElementById('player-score').textContent = calcularValorManoLocal(miMano);
-
-      // Mostrar otros jugadores
-      renderOtrosJugadoresMP(estado, null);
-
-      // Mostrar mi resultado
-      const miResultado = estado.resultados?.[String(miId)];
-      if (miResultado) {
-        const banner = document.getElementById('result-banner');
-        const title  = document.getElementById('result-title');
-        const delta  = document.getElementById('result-delta');
-
-        if (miResultado.resultado === 'gana' || miResultado.resultado === 'blackjack') {
-          title.textContent = miResultado.resultado === 'blackjack' ? '¡Blackjack!' : '¡Ganas!';
-          title.className = 'result-title win';
-          delta.textContent = '+◈ ' + miResultado.ganancia.toLocaleString('es-ES');
-          delta.style.color = 'var(--neon-green)';
-        } else if (miResultado.resultado === 'empate') {
-          title.textContent = 'Empate';
-          title.className = 'result-title push';
-          delta.textContent = 'Empate';
-          delta.style.color = 'var(--gold)';
-        } else {
-          title.textContent = miResultado.resultado === 'bust' ? '¡Te pasaste!' : 'Pierdes';
-          title.className = 'result-title lose';
-          delta.textContent = '-◈ ' + Math.abs(miResultado.ganancia).toLocaleString('es-ES');
-          delta.style.color = 'var(--neon-red)';
-        }
-
-        // Actualizar balance con la ganancia
-        balance += miResultado.ganancia;
-        updateBalanceDisplay();
-
-        banner.classList.add('show');
-      }
-
-      // Indicador
-      document.getElementById('mp-turn-indicator').textContent = 'Partida finalizada';
-      document.getElementById('mp-turn-indicator').style.color = 'var(--text-muted)';
-
-      // Ocultar botones de juego
-      document.getElementById('hit-btn').style.display = 'none';
-      document.getElementById('stand-btn').style.display = 'none';
-      document.getElementById('double-btn').style.display = 'none';
-
-      // Parar polling
-      if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
-    }
-
-    // --- Acciones multijugador (hit/stand via API) ---
-    async function hitMP() {
-      try {
-        const resp = await fetch(`/api/games/blackjack/${roomId}/pedir`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        const data = await resp.json();
-        if (!data.ok) BetM8.toast(data.error || 'Error', 'error');
-        await actualizarEstadoMP();
-      } catch (e) {
-        BetM8.toast('Error de conexion', 'error');
-      }
-    }
-
-    async function standMP() {
-      try {
-        const resp = await fetch(`/api/games/blackjack/${roomId}/plantarse`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        const data = await resp.json();
-        if (!data.ok) BetM8.toast(data.error || 'Error', 'error');
-        await actualizarEstadoMP();
-      } catch (e) {
-        BetM8.toast('Error de conexion', 'error');
-      }
-    }
-
-    // --- Funciones auxiliares multijugador ---
-    function renderCardFromString(cardStr) {
-      // Carta viene como "A♠", "10♥", etc
-      const palo = cardStr.slice(-1);
-      const valor = cardStr.slice(0, -1);
-      const isRed = RED_SUITS.has(palo);
-      return `<div class="card ${isRed ? 'red' : 'black'}">
-        <div>${valor}${palo}</div>
-        <div class="card-center">${palo}</div>
-        <div style="transform:rotate(180deg)">${valor}${palo}</div>
-      </div>`;
-    }
-
-    function renderMiniCard(cardStr) {
-      const palo = cardStr.slice(-1);
-      const valor = cardStr.slice(0, -1);
-      const isRed = RED_SUITS.has(palo);
-      return `<div class="mp-mini-card ${isRed ? 'red' : 'black'}">${valor}${palo}</div>`;
-    }
-
-    function calcularValorManoLocal(cartas) {
-      // Calcula el valor de una mano a partir de strings como "A♠"
-      let total = 0, ases = 0;
-      for (const c of cartas) {
-        if (c === '?') continue;
-        const valor = c.slice(0, -1);
-        if (['J','Q','K'].includes(valor)) total += 10;
-        else if (valor === 'A') { total += 11; ases++; }
-        else total += parseInt(valor);
-      }
-      while (total > 21 && ases > 0) { total -= 10; ases--; }
-      return total;
-    }
-
-    // ============================================
-    // MODO LOCAL (sin servidor, un jugador vs IA)
-    // ============================================
     function buildDeck() {
       deck = [];
       for (const s of SUITS) for (const v of VALUES) deck.push({ s, v });
+      // Shuffle
       for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -1012,14 +568,11 @@
       setPhaseUI('play');
 
       if (handTotal(playerHand) === 21) {
-        stand();
+        stand(); // Auto-resolve blackjack
       }
     }
 
     function hit() {
-      // Si estamos en modo multijugador, usar la API
-      if (modoMultijugador) { hitMP(); return; }
-
       playerHand.push(draw());
       renderHands(true);
       document.getElementById('double-btn').style.display = 'none';
@@ -1029,9 +582,7 @@
     }
 
     function stand() {
-      // Si estamos en modo multijugador, usar la API
-      if (modoMultijugador) { standMP(); return; }
-
+      // Dealer plays
       renderHands(false);
       setPhaseUI('result');
       const playerTotal = handTotal(playerHand);
@@ -1077,7 +628,7 @@
         result = 'lose'; gain = 0; title.textContent = '¡Te pasaste!'; title.className = 'result-title lose';
       } else if (dt > 21) {
         result = 'win'; gain = bjPlayer ? Math.floor(bet * 2.5) : bet * 2;
-        title.textContent = bjPlayer ? '¡Blackjack!' : '¡Ganas!'; title.className = 'result-title win';
+        title.textContent = dt === bjPlayer ? '¡Blackjack!' : '¡Ganas!'; title.className = 'result-title win';
       } else if (bjPlayer && dt !== 21) {
         result = 'win'; gain = Math.floor(bet * 2.5);
         title.textContent = '¡Blackjack!'; title.className = 'result-title win';
@@ -1096,6 +647,7 @@
       updateBalanceDisplay();
       saveBalance();
 
+      const net = gain - (result === 'push' ? bet : result === 'win' ? bet : bet);
       delta.textContent = result === 'win' ? '+◈ ' + (gain - bet).toLocaleString('es-ES') : result === 'push' ? 'Empate' : '-◈ ' + bet.toLocaleString('es-ES');
       delta.style.color = result === 'win' ? 'var(--neon-green)' : result === 'push' ? 'var(--gold)' : 'var(--neon-red)';
 
@@ -1121,7 +673,8 @@
       if (!user) return;
       user.coins = balance;
       BetM8.setUser(user);
-      if (roomId && !modoMultijugador) {
+      if (roomId) {
+        // Intentamos actualizar en la API, fallback a localStorage
         const room = await BetM8.getRoom(roomId);
         if (room) {
           const jugadores = room.jugadores || room.players || [];
@@ -1140,19 +693,7 @@
       document.getElementById('dealer-cards').innerHTML = '';
       document.getElementById('player-score').textContent = '—';
       document.getElementById('dealer-score').textContent = '—';
-
-      if (modoMultijugador) {
-        // En multijugador, volver a esperar que el host inicie
-        document.getElementById('mp-players').innerHTML = '';
-        if (esHost) document.getElementById('mp-start-btn').style.display = 'block';
-        document.getElementById('mp-turn-indicator').textContent = 'Esperando nueva ronda...';
-        // Reactivar polling
-        if (!pollingInterval) pollingInterval = setInterval(actualizarEstadoMP, 2000);
-        document.querySelectorAll('.chip-btn').forEach(b => b.disabled = false);
-        phase = 'bet';
-      } else {
-        setPhaseUI('bet');
-      }
+      setPhaseUI('bet');
     }
 
     function sendBjChat() {
@@ -1165,15 +706,13 @@
       msgs.innerHTML += `<div class="chat-m"><span class="chat-m-user">${name}: </span><span class="chat-m-text">${text}</span></div>`;
       msgs.scrollTop = msgs.scrollHeight;
       inp.value = '';
-
-      // Enviar al chat de la API si esta disponible
       if (roomId) {
-        fetch(`/api/rooms/${roomId}/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ mensaje: text })
-        }).catch(() => {});
+        const room = BetM8.getRoom(roomId);
+        if (room) {
+          room.chatMessages = room.chatMessages || [];
+          room.chatMessages.push({ user: name, text, at: new Date().toISOString() });
+          BetM8.updateRoom(roomId, { chatMessages: room.chatMessages });
+        }
       }
     }
 
