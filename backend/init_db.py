@@ -1,15 +1,16 @@
 """
 init_db.py - Script para inicializar la base de datos.
-Crea la base de datos, las tablas y un usuario demo.
+Crea las tablas y un usuario demo en PostgreSQL (Supabase).
 Ejecutar una sola vez antes de arrancar el servidor.
 
 Uso: python init_db.py
 """
 
 import os
-import mysql.connector
+import psycopg2
+import psycopg2.extras
 from werkzeug.security import generate_password_hash
-from config import DB_HOST, DB_USER, DB_PASS, DB_NAME
+from config import DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
 
 # Fichas iniciales para el usuario demo
 FICHAS_DEMO = 5000
@@ -21,36 +22,27 @@ def main():
     print("=" * 40)
     print()
 
-    # --- Paso 1: Conectar a MySQL (sin seleccionar base de datos) ---
-    print("Conectando a MySQL...")
+    # --- Paso 1: Conectar a PostgreSQL (Supabase) ---
+    print("Conectando a PostgreSQL...")
     try:
-        conexion = mysql.connector.connect(
+        conexion = psycopg2.connect(
             host=DB_HOST,
+            port=DB_PORT,
+            dbname=DB_NAME,
             user=DB_USER,
-            password=DB_PASS
+            password=DB_PASS,
+            cursor_factory=psycopg2.extras.RealDictCursor
         )
         cursor = conexion.cursor()
         print("✓ Conexión establecida")
     except Exception as e:
-        print(f"✕ Error al conectar a MySQL: {e}")
+        print(f"✕ Error al conectar a PostgreSQL: {e}")
         print()
-        print("Verifica que MySQL esté corriendo y que las credenciales")
-        print("en .env (o config.py) sean correctas.")
+        print("Verifica que los datos de conexión en .env sean correctos")
+        print("y que Supabase esté accesible.")
         return
 
-    # --- Paso 2: Crear la base de datos ---
-    print()
-    print(f"Creando base de datos '{DB_NAME}'...")
-    try:
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-        cursor.execute(f"USE {DB_NAME}")
-        print(f"✓ Base de datos '{DB_NAME}' lista")
-    except Exception as e:
-        print(f"✕ Error al crear la base de datos: {e}")
-        conexion.close()
-        return
-
-    # --- Paso 3: Ejecutar el schema.sql ---
+    # --- Paso 2: Ejecutar el schema.sql ---
     print()
     print("Creando tablas...")
     try:
@@ -60,15 +52,11 @@ def main():
             schema_sql = f.read()
 
         # Ejecutar cada sentencia SQL por separado
-        # (MySQL connector no soporta múltiples sentencias por defecto)
         sentencias = schema_sql.split(";")
         for sentencia in sentencias:
             sentencia = sentencia.strip()
             # Ignorar líneas vacías y comentarios
             if sentencia and not sentencia.startswith("--"):
-                # Ignorar las sentencias CREATE DATABASE y USE (ya las hicimos)
-                if sentencia.upper().startswith("CREATE DATABASE") or sentencia.upper().startswith("USE"):
-                    continue
                 cursor.execute(sentencia)
 
         conexion.commit()
@@ -81,10 +69,11 @@ def main():
         print("  - mensajes_chat")
     except Exception as e:
         print(f"✕ Error al crear las tablas: {e}")
+        conexion.rollback()
         conexion.close()
         return
 
-    # --- Paso 4: Crear usuario demo ---
+    # --- Paso 3: Crear usuario demo ---
     print()
     print("Creando usuario demo...")
     try:
@@ -108,6 +97,7 @@ def main():
             print(f"  - Fichas: {FICHAS_DEMO}")
     except Exception as e:
         print(f"✕ Error al crear usuario demo: {e}")
+        conexion.rollback()
 
     # --- Finalizar ---
     conexion.close()

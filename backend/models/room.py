@@ -48,10 +48,12 @@ def crear_sala(nombre, juego, host_id, tipo="publica", password=None,
                                codigo_inv, es_torneo)
             VALUES (%s, %s, %s, %s, %s, %s, %s, 'esperando', %s, %s)
         """
+        # RETURNING id devuelve el ID de la sala recién creada (PostgreSQL)
+        query = query.rstrip() + " RETURNING id"
         cursor.execute(query, (nombre, juego, host_id, tipo, password_hash,
                                max_jugadores, fichas_inicio, codigo_inv, es_torneo))
 
-        sala_id = cursor.lastrowid
+        sala_id = cursor.fetchone()["id"]
 
         # Añadir al host como primer jugador de la sala
         query_jugador = """
@@ -96,7 +98,7 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Query base: salas con conteo de jugadores activos y nombre del host
         query = """
@@ -104,7 +106,7 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
                    u.username AS host_username,
                    COUNT(sp.id) AS jugadores_actuales
             FROM salas s
-            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = 1
+            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = TRUE
             LEFT JOIN usuarios u ON s.host_id = u.id
         """
 
@@ -163,7 +165,7 @@ def obtener_sala(sala_id):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Obtener datos de la sala con el nombre del host
         query_sala = """
@@ -190,7 +192,7 @@ def obtener_sala(sala_id):
                    u.username, u.avatar, u.level
             FROM sala_jugadores sp
             JOIN usuarios u ON sp.usuario_id = u.id
-            WHERE sp.sala_id = %s AND sp.activo = 1
+            WHERE sp.sala_id = %s AND sp.activo = TRUE
         """
         cursor.execute(query_jugadores, (sala_id,))
         jugadores = cursor.fetchall()
@@ -217,13 +219,13 @@ def obtener_sala_por_codigo(codigo):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         query = """
             SELECT s.*, u.username AS host_username,
                    COUNT(sp.id) AS jugadores_actuales
             FROM salas s
-            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = 1
+            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = TRUE
             LEFT JOIN usuarios u ON s.host_id = u.id
             WHERE s.codigo_inv = %s
             GROUP BY s.id
@@ -258,7 +260,7 @@ def unirse_sala(sala_id, usuario_id, password=None):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Obtener datos de la sala
         cursor.execute("SELECT * FROM salas WHERE id = %s", (sala_id,))
@@ -279,7 +281,7 @@ def unirse_sala(sala_id, usuario_id, password=None):
 
         # Contar jugadores activos
         cursor.execute(
-            "SELECT COUNT(*) AS total FROM sala_jugadores WHERE sala_id = %s AND activo = 1",
+            "SELECT COUNT(*) AS total FROM sala_jugadores WHERE sala_id = %s AND activo = TRUE",
             (sala_id,)
         )
         resultado = cursor.fetchone()
@@ -300,7 +302,7 @@ def unirse_sala(sala_id, usuario_id, password=None):
                 return False, "Ya estás en esta sala"
             # Reactivar al jugador que había salido antes
             cursor.execute(
-                "UPDATE sala_jugadores SET activo = 1, fichas = %s WHERE sala_id = %s AND usuario_id = %s",
+                "UPDATE sala_jugadores SET activo = TRUE, fichas = %s WHERE sala_id = %s AND usuario_id = %s",
                 (sala["fichas_inicio"], sala_id, usuario_id)
             )
         else:
@@ -333,7 +335,7 @@ def salir_sala(sala_id, usuario_id):
         cursor = conexion.cursor()
 
         cursor.execute(
-            "UPDATE sala_jugadores SET activo = 0 WHERE sala_id = %s AND usuario_id = %s",
+            "UPDATE sala_jugadores SET activo = FALSE WHERE sala_id = %s AND usuario_id = %s",
             (sala_id, usuario_id)
         )
         conexion.commit()
@@ -394,11 +396,11 @@ def dar_fichas(sala_id, de_usuario_id, a_usuario_id, cantidad, motivo="reparto")
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Verificar que el que da tiene suficientes fichas
         cursor.execute(
-            "SELECT fichas FROM sala_jugadores WHERE sala_id = %s AND usuario_id = %s AND activo = 1",
+            "SELECT fichas FROM sala_jugadores WHERE sala_id = %s AND usuario_id = %s AND activo = TRUE",
             (sala_id, de_usuario_id)
         )
         resultado = cursor.fetchone()
@@ -411,7 +413,7 @@ def dar_fichas(sala_id, de_usuario_id, a_usuario_id, cantidad, motivo="reparto")
 
         # Verificar que el receptor está en la sala
         cursor.execute(
-            "SELECT fichas FROM sala_jugadores WHERE sala_id = %s AND usuario_id = %s AND activo = 1",
+            "SELECT fichas FROM sala_jugadores WHERE sala_id = %s AND usuario_id = %s AND activo = TRUE",
             (sala_id, a_usuario_id)
         )
         receptor = cursor.fetchone()

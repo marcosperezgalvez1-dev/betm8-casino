@@ -14,16 +14,17 @@ def enviar_mensaje(sala_id, usuario_id, mensaje):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Insertar el mensaje
+        # RETURNING id devuelve el ID del mensaje recién creado (PostgreSQL)
         cursor.execute(
-            "INSERT INTO mensajes_chat (sala_id, usuario_id, mensaje) VALUES (%s, %s, %s)",
+            "INSERT INTO mensajes_chat (sala_id, usuario_id, mensaje) VALUES (%s, %s, %s) RETURNING id",
             (sala_id, usuario_id, mensaje)
         )
         conexion.commit()
 
-        mensaje_id = cursor.lastrowid
+        mensaje_id = cursor.fetchone()["id"]
 
         # Obtener el mensaje con el username del autor
         cursor.execute(
@@ -59,7 +60,7 @@ def obtener_mensajes(sala_id, limite=50):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         # Obtener los últimos mensajes con datos del autor
         # Usamos un subquery para obtener los últimos N y luego los ordenamos cronológicamente

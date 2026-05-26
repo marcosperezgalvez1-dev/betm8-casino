@@ -10,11 +10,12 @@ from dotenv import load_dotenv
 # Cargar variables de entorno desde .env (si existe el archivo)
 load_dotenv()
 
-# --- Configuración de la base de datos MySQL ---
+# --- Configuración de la base de datos PostgreSQL (Supabase) ---
 DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_USER = os.getenv("DB_USER", "root")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "postgres")
+DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASS", "")
-DB_NAME = os.getenv("DB_NAME", "betm8")
 
 # --- Clave secreta para sesiones y tokens ---
 SECRET_KEY = os.getenv("SECRET_KEY", "betm8-secret-key-dev")

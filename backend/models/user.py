@@ -30,11 +30,13 @@ def crear_usuario(username, email, password):
             INSERT INTO usuarios (username, email, password_hash, coins)
             VALUES (%s, %s, %s, %s)
         """
+        # RETURNING id devuelve el ID del usuario recién creado (PostgreSQL)
+        query += " RETURNING id"
         cursor.execute(query, (username, email, password_hash, FICHAS_INICIALES))
         conexion.commit()
 
         # Obtener el ID del usuario recién creado
-        user_id = cursor.lastrowid
+        user_id = cursor.fetchone()["id"]
 
         # Devolver los datos del usuario (sin la contraseña)
         usuario = {
@@ -69,7 +71,7 @@ def buscar_por_username_o_email(valor):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         query = """
             SELECT * FROM usuarios
@@ -98,7 +100,7 @@ def buscar_por_id(user_id):
     conexion = None
     try:
         conexion = get_db()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor()
 
         query = """
             SELECT id, username, email, coins, xp, level, avatar,
