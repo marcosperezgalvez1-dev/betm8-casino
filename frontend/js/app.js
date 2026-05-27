@@ -20,7 +20,7 @@
 // En producción (Arsys) apunta a PythonAnywhere
 const API_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:5000'
-  : 'https://PYTHONANYWHERE_USER.pythonanywhere.com';
+  : 'https://marcosperezgalvezdev.pythonanywhere.com';
 
 // Usuario en memoria (cache para no leer localStorage cada vez)
 let _currentUser = null;

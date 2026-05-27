@@ -105,9 +105,9 @@ casino-online/
 - **Frontend:** Arsys (hosting estatico — HTML/CSS/JS)
 - **Backend:** PythonAnywhere (Flask API via wsgi.py)
 - **Base de datos:** Supabase (PostgreSQL)
-- **Placeholders pendientes:**
-  - `PYTHONANYWHERE_USER` en frontend/js/app.js
-  - `ARSYS_DOMAIN` en backend/app.py
+- **URLs producción:**
+  - API: https://marcosperezgalvezdev.pythonanywhere.com
+  - Frontend: https://betm8.es / https://www.betm8.es
 
 ## Estado Actual
 - **Fecha inicio:** 2026-04-30

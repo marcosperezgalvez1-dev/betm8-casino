@@ -21,7 +21,8 @@ CORS(app, origins=[
     'http://localhost',
     'http://localhost:5000',
     'http://127.0.0.1',
-    'https://ARSYS_DOMAIN.com'
+    'https://betm8.es',
+    'https://www.betm8.es'
 ], supports_credentials=True)
 
 # --- Registrar los blueprints (rutas) ---
