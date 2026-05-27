@@ -87,21 +87,6 @@
       margin-bottom: 48px;
     }
 
-    .hero-stats {
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-
-    .hero-stat { display: flex; flex-direction: column; gap: 2px; }
-    .hero-stat-value {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .hero-stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-
     .hero-visual {
       position: absolute;
       right: 0;
@@ -205,8 +190,6 @@
       margin-bottom: 4px;
     }
     .game-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
-    .game-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-
     .steps-row {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -319,24 +302,6 @@
           <a href="register.html" class="btn btn-primary btn-lg">Empezar gratis</a>
           <a href="lobby.html" class="btn btn-ghost btn-lg">Ver salas</a>
         </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hero-stat-value">6</span>
-            <span class="hero-stat-label">Juegos</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-value">◈ 5.000</span>
-            <span class="hero-stat-label">Fichas de inicio</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-value">∞</span>
-            <span class="hero-stat-label">Salas posibles</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-value">0€</span>
-            <span class="hero-stat-label">Dinero real</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -372,27 +337,27 @@
       <div class="games-grid">
         <a href="blackjack.html" class="game-card">
           <div class="game-thumb game-thumb-bj"><span>🃏</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,255,157,0.1),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Blackjack</div><div class="game-desc">Planta o pide carta. Llega a 21 sin pasarte y supera al crupier.</div><div class="game-meta"><span class="badge badge-green">Fácil</span><span class="badge badge-gold">Clásico</span></div></div>
+          <div class="game-info"><div class="game-title">Blackjack</div><div class="game-desc">Planta o pide carta. Llega a 21 sin pasarte y supera al crupier.</div></div></div>
         </a>
         <a href="ruleta.html" class="game-card">
           <div class="game-thumb game-thumb-rl"><span>🎡</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(255,68,102,0.1),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Ruleta</div><div class="game-desc">Apuesta a números, colores o grupos. La bola decide tu fortuna.</div><div class="game-meta"><span class="badge badge-red">Alta tensión</span><span class="badge badge-gold">Clásico</span></div></div>
+          <div class="game-info"><div class="game-title">Ruleta</div><div class="game-desc">Apuesta a números, colores o grupos. La bola decide tu fortuna.</div></div>
         </a>
         <a href="poker.html" class="game-card">
           <div class="game-thumb game-thumb-pk"><span>♠️</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,207,255,0.1),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Poker Texas Hold'em</div><div class="game-desc">Estrategia, faroleo y cartas comunitarias. El juego más social.</div><div class="game-meta"><span class="badge badge-blue">Estrategia</span><span class="badge badge-purple">Multijugador</span></div></div>
+          <div class="game-info"><div class="game-title">Poker Texas Hold'em</div><div class="game-desc">Estrategia, faroleo y cartas comunitarias. El juego más social.</div></div>
         </a>
         <a href="slots.html" class="game-card">
           <div class="game-thumb game-thumb-sl"><span>🎰</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(168,85,247,0.1),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Tragaperras</div><div class="game-desc">Gira los rodillos y cruza los dedos. El jackpot te espera.</div><div class="game-meta"><span class="badge badge-purple">Suerte pura</span><span class="badge badge-gold">Jackpot</span></div></div>
+          <div class="game-info"><div class="game-title">Tragaperras</div><div class="game-desc">Gira los rodillos y cruza los dedos. El jackpot te espera.</div></div>
         </a>
         <a href="baccarat.html" class="game-card">
           <div class="game-thumb game-thumb-bc"><span>🎴</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(212,168,67,0.1),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Baccarat</div><div class="game-desc">Apuesta al Jugador, la Banca o Empate. Elegancia y sencillez.</div><div class="game-meta"><span class="badge badge-gold">VIP</span><span class="badge badge-green">Rápido</span></div></div>
+          <div class="game-info"><div class="game-title">Baccarat</div><div class="game-desc">Apuesta al Jugador, la Banca o Empate. Elegancia y sencillez.</div></div>
         </a>
         <a href="dados.html" class="game-card">
           <div class="game-thumb game-thumb-cr"><span>🎲</span><div class="game-thumb-glow" style="background:radial-gradient(circle,rgba(0,207,255,0.12),transparent)"></div></div>
-          <div class="game-info"><div class="game-title">Dados (Craps)</div><div class="game-desc">Lanza los dados y apuesta al resultado. Adrenalina pura.</div><div class="game-meta"><span class="badge badge-blue">Acción</span><span class="badge badge-red">Apuestas múltiples</span></div></div>
+          <div class="game-info"><div class="game-title">Dados (Craps)</div><div class="game-desc">Lanza los dados y apuesta al resultado. Adrenalina pura.</div></div>
         </a>
       </div>
     </div>
