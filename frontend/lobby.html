@@ -315,7 +315,7 @@
 
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-primary" id="modal-join-btn" onclick="confirmJoin()">Unirse</button>
+        <button class="btn btn-primary" id="modal-join-btn">Unirse</button>
       </div>
     </div>
   </div>
@@ -443,8 +443,22 @@
       const full = numJugadores >= maxJugadores;
       const estado = room.estado || room.status;
       const btn = document.getElementById('modal-join-btn');
-      btn.disabled = full || estado === 'jugando' || estado === 'playing';
-      btn.textContent = full ? 'Sala llena' : (estado === 'jugando' || estado === 'playing') ? 'Partida en curso' : 'Unirse';
+
+      // Comprobar si el usuario ya está en la sala
+      const yaUnido = jugadores.some(p => (p.usuario_id || p.id) === user.id);
+
+      if (yaUnido) {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+        btn.onclick = function() {
+          const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', tragaperras:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
+          window.location.href = (gamePages[juego] || 'gestion-sala.html') + '?room=' + room.id;
+        };
+      } else {
+        btn.disabled = full || estado === 'jugando' || estado === 'playing';
+        btn.textContent = full ? 'Sala llena' : (estado === 'jugando' || estado === 'playing') ? 'Partida en curso' : 'Unirse';
+        btn.onclick = confirmJoin;
+      }
 
       document.getElementById('modal-info').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:6px">
@@ -473,9 +487,9 @@
         BetM8.toast('Te has unido a ' + (selectedRoom.nombre || selectedRoom.name), 'success');
         closeModal();
         const juego = selectedRoom.juego || selectedRoom.game;
-        const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
+        const gamePages = { blackjack:'blackjack.html', ruleta:'ruleta.html', poker:'poker.html', slots:'slots.html', tragaperras:'slots.html', baccarat:'baccarat.html', dados:'dados.html' };
         setTimeout(() => {
-          window.location.href = (gamePages[juego] || 'lobby.html') + '?room=' + selectedRoom.id;
+          window.location.href = (gamePages[juego] || 'gestion-sala.html') + '?room=' + selectedRoom.id;
         }, 500);
       } else {
         BetM8.toast(result.error || result.msg || 'Error al unirse', 'error');
