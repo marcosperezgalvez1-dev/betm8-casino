@@ -16,8 +16,13 @@ FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 app.secret_key = SECRET_KEY
 
-# Habilitar CORS para que el frontend pueda hacer peticiones a la API
-CORS(app)
+# Habilitar CORS para permitir peticiones desde Arsys (producción) y localhost (desarrollo)
+CORS(app, origins=[
+    'http://localhost',
+    'http://localhost:5000',
+    'http://127.0.0.1',
+    'https://ARSYS_DOMAIN.com'
+], supports_credentials=True)
 
 # --- Registrar los blueprints (rutas) ---
 from routes.auth import auth_bp

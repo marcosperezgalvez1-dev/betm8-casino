@@ -101,13 +101,21 @@ casino-online/
 - `GET/POST /api/rooms/<id>/chat` — leer/enviar mensajes
 - `GET /api/rooms/join-code/<codigo>` — buscar por codigo
 
+## Arquitectura de Despliegue
+- **Frontend:** Arsys (hosting estatico — HTML/CSS/JS)
+- **Backend:** PythonAnywhere (Flask API via wsgi.py)
+- **Base de datos:** Supabase (PostgreSQL)
+- **Placeholders pendientes:**
+  - `PYTHONANYWHERE_USER` en frontend/js/app.js
+  - `ARSYS_DOMAIN` en backend/app.py
+
 ## Estado Actual
 - **Fecha inicio:** 2026-04-30
-- **Fase:** Backend completo, frontend conectado
+- **Fase:** Backend completo, frontend conectado, preparado para despliegue
 - **Frontend:** Completo (13 paginas, 6 juegos funcionales)
-- **Backend:** Completo (auth, salas, chat, modelos, BD)
+- **Backend:** Completo (auth, salas, chat, modelos, BD, wsgi.py)
 - **Conexion:** Frontend usa API con fallback a localStorage
-- **Pendiente:** Testing end-to-end, despliegue, logica multijugador en tiempo real
+- **Pendiente:** Testing end-to-end, despliegue final, logica multijugador en tiempo real
 
 ## Convenciones de Codigo
 - Comentarios y nombres en espanol

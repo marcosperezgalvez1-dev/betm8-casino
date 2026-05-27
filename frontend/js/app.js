@@ -15,8 +15,12 @@
    como fallback y para compatibilidad.
    ============================================ */
 
-// Base de la API (vacío = mismo origen, Flask sirve todo)
-const API_BASE = '';
+// Base de la API — detecta entorno automáticamente:
+// En local apunta a Flask en localhost:5000
+// En producción (Arsys) apunta a PythonAnywhere
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:5000'
+  : 'https://PYTHONANYWHERE_USER.pythonanywhere.com';
 
 // Usuario en memoria (cache para no leer localStorage cada vez)
 let _currentUser = null;

@@ -30,7 +30,6 @@ body { background:#080a14; }
 .poker-card {
   width: 64px; height: 92px;
   background: #fff;
-  color: #111;
   border-radius: 6px;
   display: flex; flex-direction: column; justify-content: space-between;
   padding: 5px 7px;
@@ -39,8 +38,8 @@ body { background:#080a14; }
   position: relative;
   animation: cardDeal 0.3s ease;
 }
-@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); } to { transform: scale(1); } }
-.poker-card.red { color: #cc0000; }
+@keyframes cardDeal { from { transform: scale(0.5) translateY(-20px); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.poker-card.red { color: #c00; }
 .poker-card.back { background: linear-gradient(135deg,#1a3a8a,#0f2060); }
 .poker-card.back::after { content: '♦'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: rgba(255,255,255,0.15); }
 .poker-card .center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.4rem; }
@@ -112,58 +111,6 @@ body { background:#080a14; }
 .hand-rank { background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--font-display); font-weight: 700; color: var(--gold); text-align: center; }
 
 @media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
-.help-btn {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--gold);
-  background: transparent;
-  color: var(--gold);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.help-btn:hover { background: var(--gold-glow); }
-.help-modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center;
-  z-index: 300;
-}
-.help-modal-overlay.show { display: flex; }
-.help-modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 28px 32px;
-  max-width: 480px;
-  width: 90%;
-  position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-.help-modal-title {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  color: var(--gold);
-  margin-bottom: 14px;
-}
-.help-modal-body {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-.help-modal-close {
-  position: absolute;
-  top: 12px; right: 16px;
-  background: none; border: none;
-  color: var(--text-muted);
-  font-size: 1.4rem;
-  cursor: pointer;
-}
-.help-modal-close:hover { color: #fff; }
 </style>
 </head>
 <body>
@@ -173,7 +120,6 @@ body { background:#080a14; }
 <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
 <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">♠️ Poker Texas Hold'em</div>
 <div id="room-info-bar" style="margin-left:auto"></div>
-<button class="help-btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
 </div>
 
 <div class="game-layout">
@@ -217,14 +163,6 @@ body { background:#080a14; }
 </div>
 <a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
 </div>
-</div>
-</div>
-
-<div class="help-modal-overlay" id="help-modal">
-<div class="help-modal">
-<button class="help-modal-close" onclick="document.getElementById('help-modal').classList.remove('show')">&times;</button>
-<div class="help-modal-title">Cómo jugar — Poker Texas Hold'em</div>
-<div class="help-modal-body">Cada jugador recibe 2 cartas privadas. Se reparten 5 cartas comunitarias en 3 fases (Flop, Turn, River). Acciones: Fold (retirarse), Check (pasar), Call (igualar), Raise (subir), All-in. Gana la mejor mano de 5 cartas.<br><br><strong>Ranking:</strong> Escalera real > Escalera de color > Póker > Full > Color > Escalera > Trío > Doble pareja > Pareja > Carta alta.</div>
 </div>
 </div>
 
@@ -421,10 +359,6 @@ async function saveBalance() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
-
-document.getElementById('help-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('show');
-});
 </script>
 </body>
 </html>
