@@ -51,7 +51,7 @@ def crear_sala(nombre, juego, host_id, tipo="publica", password=None,
         # RETURNING id devuelve el ID de la sala recién creada (PostgreSQL)
         query = query.rstrip() + " RETURNING id"
         cursor.execute(query, (nombre, juego, host_id, tipo, password_hash,
-                               max_jugadores, fichas_inicio, codigo_inv, es_torneo))
+                               max_jugadores, fichas_inicio, codigo_inv, int(es_torneo)))
 
         sala_id = cursor.fetchone()["id"]
 
@@ -100,13 +100,13 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
         conexion = get_db()
         cursor = conexion.cursor()
 
-        # Query base: salas con conteo de jugadores activos y nombre del host
+        # Query base: salas con conteo de jugadores activos (subquery) y nombre del host
         query = """
             SELECT s.*,
                    u.username AS host_username,
-                   COUNT(sp.id) AS jugadores_actuales
+                   (SELECT COUNT(*) FROM sala_jugadores sj
+                    WHERE sj.sala_id = s.id AND sj.activo = TRUE) AS jugadores_actuales
             FROM salas s
-            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = TRUE
             LEFT JOIN usuarios u ON s.host_id = u.id
         """
 
@@ -127,14 +127,14 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
             parametros.append(filtro_estado)
 
         if busqueda:
-            condiciones.append("s.nombre LIKE %s")
+            condiciones.append("s.nombre ILIKE %s")
             parametros.append(f"%{busqueda}%")
 
         # Añadir las condiciones al query si hay alguna
         if condiciones:
             query += " WHERE " + " AND ".join(condiciones)
 
-        query += " GROUP BY s.id ORDER BY s.created_at DESC"
+        query += " ORDER BY s.created_at DESC"
 
         cursor.execute(query, parametros)
         salas = cursor.fetchall()
@@ -223,12 +223,11 @@ def obtener_sala_por_codigo(codigo):
 
         query = """
             SELECT s.*, u.username AS host_username,
-                   COUNT(sp.id) AS jugadores_actuales
+                   (SELECT COUNT(*) FROM sala_jugadores sj
+                    WHERE sj.sala_id = s.id AND sj.activo = TRUE) AS jugadores_actuales
             FROM salas s
-            LEFT JOIN sala_jugadores sp ON s.id = sp.sala_id AND sp.activo = TRUE
             LEFT JOIN usuarios u ON s.host_id = u.id
             WHERE s.codigo_inv = %s
-            GROUP BY s.id
         """
         cursor.execute(query, (codigo,))
         sala = cursor.fetchone()
