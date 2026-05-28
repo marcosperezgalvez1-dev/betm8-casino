@@ -111,6 +111,64 @@ body { background:#080a14; }
 .info-card-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
 .hand-rank { background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--font-display); font-weight: 700; color: var(--gold); text-align: center; }
 
+.help-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.help-btn:hover { background: var(--gold-glow); }
+.help-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 300;
+}
+.help-modal-overlay.show { display: flex; }
+.help-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  max-width: 520px;
+  width: 90%;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.help-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.help-modal-body {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.help-modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.help-modal-close:hover { color: #fff; }
+.hands-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.hands-table th { text-align: left; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.hands-table td { padding: 7px 8px; font-size: 0.84rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.hands-table td:first-child { color: var(--gold); font-weight: 600; white-space: nowrap; }
+.hands-table td:last-child { color: var(--text-muted); font-size: 0.8rem; }
+
 @media (max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -121,6 +179,7 @@ body { background:#080a14; }
 <a href="lobby.html" class="btn btn-ghost btn-sm">← Lobby</a>
 <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;white-space:nowrap">♠️ Poker Texas Hold'em</div>
 <div id="room-info-bar" style="margin-left:auto"></div>
+<button class="help-btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
 </div>
 
 <div class="game-layout">
@@ -165,6 +224,31 @@ body { background:#080a14; }
 <a href="gestion-sala.html" id="host-link" class="btn btn-outline btn-sm" style="display:none;text-align:center">Panel de anfitrión</a>
 </div>
 </div>
+</div>
+
+<div class="help-modal-overlay" id="help-modal">
+  <div class="help-modal">
+    <button class="help-modal-close" onclick="document.getElementById('help-modal').classList.remove('show')">&times;</button>
+    <div class="help-modal-title">Cómo jugar — Poker Texas Hold'em</div>
+    <div class="help-modal-body">
+      Cada jugador recibe 2 cartas privadas. Se reparten 5 cartas comunitarias en tres fases (Flop, Turn, River). Combina tus cartas con las comunitarias para formar la mejor mano de 5 cartas. Puedes apostar, igualar, subir o retirarte en cada ronda.
+      <table class="hands-table">
+        <thead><tr><th>#</th><th>Mano</th><th>Ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Escalera Real</td><td>A K Q J 10 del mismo palo</td></tr>
+          <tr><td>2</td><td>Escalera de Color</td><td>5 6 7 8 9 del mismo palo</td></tr>
+          <tr><td>3</td><td>Póker</td><td>4 cartas iguales (ej. 9♠ 9♥ 9♦ 9♣)</td></tr>
+          <tr><td>4</td><td>Full House</td><td>Trío + pareja (ej. K K K 3 3)</td></tr>
+          <tr><td>5</td><td>Color / Flush</td><td>5 cartas del mismo palo</td></tr>
+          <tr><td>6</td><td>Escalera</td><td>5 cartas seguidas (ej. 4 5 6 7 8)</td></tr>
+          <tr><td>7</td><td>Trío</td><td>3 cartas iguales (ej. J J J)</td></tr>
+          <tr><td>8</td><td>Doble Pareja</td><td>Dos parejas (ej. 10 10 5 5)</td></tr>
+          <tr><td>9</td><td>Pareja</td><td>2 cartas iguales (ej. A A)</td></tr>
+          <tr><td>10</td><td>Carta Alta</td><td>La carta más alta de tu mano</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script src="js/app.js"></script>
@@ -360,6 +444,10 @@ async function saveBalance() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('help-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
 </script>
 </body>
 </html>
