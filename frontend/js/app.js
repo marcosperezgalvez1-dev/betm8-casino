@@ -489,7 +489,14 @@ const BetM8 = {
       <div class="navbar-actions">
         ${user ? `
           <div class="navbar-coins">${(user.coins || 0).toLocaleString()}</div>
-          <div class="navbar-avatar" title="${user.username}" onclick="BetM8.logout()">${user.avatar || user.username.slice(0,2).toUpperCase()}</div>
+          <div class="navbar-user-wrap">
+            <div class="navbar-avatar" title="${user.username}" onclick="BetM8.toggleUserDropdown(event)">${user.avatar || user.username.slice(0,2).toUpperCase()}</div>
+            <div class="navbar-dropdown" id="user-dropdown">
+              <button class="navbar-dropdown-item" onclick="BetM8.toast('Próximamente','info')">👤 Mi perfil</button>
+              <div class="navbar-dropdown-sep"></div>
+              <button class="navbar-dropdown-item danger" onclick="BetM8.logout()">🚪 Cerrar sesión</button>
+            </div>
+          </div>
         ` : `
           <a href="login.html" class="btn btn-ghost btn-sm">Iniciar sesión</a>
           <a href="register.html" class="btn btn-primary btn-sm">Registrarse</a>
@@ -502,6 +509,12 @@ const BetM8 = {
   toggleMobileNav() {
     const links = document.getElementById('nav-links');
     if (links) links.classList.toggle('open');
+  },
+
+  toggleUserDropdown(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('user-dropdown');
+    if (dd) dd.classList.toggle('open');
   },
 
   // ============================================
@@ -556,4 +569,10 @@ const BetM8 = {
 };
 
 // Renderizar la navbar automáticamente al cargar la página
-document.addEventListener('DOMContentLoaded', () => BetM8.renderNavbar());
+document.addEventListener('DOMContentLoaded', () => {
+  BetM8.renderNavbar();
+  document.addEventListener('click', () => {
+    const dd = document.getElementById('user-dropdown');
+    if (dd) dd.classList.remove('open');
+  });
+});
