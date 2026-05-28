@@ -32,16 +32,6 @@
     .room-type-card h4 { font-family: var(--font-display); font-size: 1rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
     .room-type-card p { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; }
 
-    .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .schema-table { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-    .schema-table-header { background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 10px 16px; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
-    .schema-table-header::before { content: '⬛'; font-size: 0.7rem; color: var(--gold-dark); }
-    .schema-field { padding: 8px 16px; border-bottom: 1px solid rgba(42,42,58,0.5); font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
-    .schema-field:last-child { border-bottom: none; }
-    .schema-field-name { color: var(--text-primary); font-family: monospace; }
-    .schema-field-type { color: var(--neon-blue); font-family: monospace; font-size: 0.78rem; }
-    .schema-field-pk { color: var(--gold); font-size: 0.7rem; font-weight: 700; }
-
     .section { padding: 64px 0; }
     .games-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 20px 0; }
     .game-row { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; }
@@ -159,78 +149,6 @@
         <div class="game-row"><div class="game-row-icon">🎰</div><div class="game-row-info"><h4>Tragaperras</h4><p>Rodillos, líneas y jackpot progresivo.</p></div><a href="slots.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
         <div class="game-row"><div class="game-row-icon">🎴</div><div class="game-row-info"><h4>Baccarat</h4><p>Jugador vs Banca. El 9 gana.</p></div><a href="baccarat.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
         <div class="game-row"><div class="game-row-icon">🎲</div><div class="game-row-info"><h4>Dados (Craps)</h4><p>Lanza y apuesta al resultado del dado.</p></div><a href="dados.html" class="btn btn-ghost btn-sm" style="margin-left:auto">Jugar</a></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="background:var(--bg-surface)">
-    <div class="container">
-      <div style="margin-bottom:32px">
-        <div style="font-size:0.8rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px">Base de datos</div>
-        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem)">Esquema MySQL</h2>
-        <p style="color:var(--text-secondary);margin-top:8px;font-size:0.9rem">Tablas principales del backend BetM8</p>
-      </div>
-      <div class="schema-grid">
-        <div class="schema-table">
-          <div class="schema-table-header">usuarios</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">username</span><span class="schema-field-type">VARCHAR(30) UNIQUE</span></div>
-          <div class="schema-field"><span class="schema-field-name">email</span><span class="schema-field-type">VARCHAR(100) UNIQUE</span></div>
-          <div class="schema-field"><span class="schema-field-name">password_hash</span><span class="schema-field-type">VARCHAR(255)</span></div>
-          <div class="schema-field"><span class="schema-field-name">coins</span><span class="schema-field-type">BIGINT DEFAULT 5000</span></div>
-          <div class="schema-field"><span class="schema-field-name">xp</span><span class="schema-field-type">INT DEFAULT 0</span></div>
-          <div class="schema-field"><span class="schema-field-name">created_at</span><span class="schema-field-type">TIMESTAMP</span></div>
-        </div>
-        <div class="schema-table">
-          <div class="schema-table-header">salas</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">nombre</span><span class="schema-field-type">VARCHAR(60)</span></div>
-          <div class="schema-field"><span class="schema-field-name">juego</span><span class="schema-field-type">ENUM(bj,rl,pk,sl,bc,cr)</span></div>
-          <div class="schema-field"><span class="schema-field-name">host_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">tipo</span><span class="schema-field-type">ENUM(public,private)</span></div>
-          <div class="schema-field"><span class="schema-field-name">password</span><span class="schema-field-type">VARCHAR(60) NULL</span></div>
-          <div class="schema-field"><span class="schema-field-name">max_jugadores</span><span class="schema-field-type">TINYINT DEFAULT 8</span></div>
-          <div class="schema-field"><span class="schema-field-name">fichas_inicio</span><span class="schema-field-type">INT DEFAULT 1000</span></div>
-          <div class="schema-field"><span class="schema-field-name">estado</span><span class="schema-field-type">ENUM(waiting,playing,done)</span></div>
-          <div class="schema-field"><span class="schema-field-name">codigo_inv</span><span class="schema-field-type">VARCHAR(8) UNIQUE</span></div>
-          <div class="schema-field"><span class="schema-field-name">es_torneo</span><span class="schema-field-type">TINYINT(1) DEFAULT 0</span></div>
-        </div>
-        <div class="schema-table">
-          <div class="schema-table-header">sala_jugadores</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">fichas</span><span class="schema-field-type">INT</span></div>
-          <div class="schema-field"><span class="schema-field-name">unido_at</span><span class="schema-field-type">TIMESTAMP</span></div>
-          <div class="schema-field"><span class="schema-field-name">activo</span><span class="schema-field-type">TINYINT(1) DEFAULT 1</span></div>
-        </div>
-        <div class="schema-table">
-          <div class="schema-table-header">partidas</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">ronda</span><span class="schema-field-type">INT DEFAULT 1</span></div>
-          <div class="schema-field"><span class="schema-field-name">iniciada_at</span><span class="schema-field-type">TIMESTAMP</span></div>
-          <div class="schema-field"><span class="schema-field-name">finalizada_at</span><span class="schema-field-type">TIMESTAMP NULL</span></div>
-          <div class="schema-field"><span class="schema-field-name">estado_json</span><span class="schema-field-type">JSON</span></div>
-        </div>
-        <div class="schema-table">
-          <div class="schema-table-header">transacciones</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">sala_id</span><span class="schema-field-type">INT NULL</span></div>
-          <div class="schema-field"><span class="schema-field-name">cantidad</span><span class="schema-field-type">INT</span></div>
-          <div class="schema-field"><span class="schema-field-name">tipo</span><span class="schema-field-type">ENUM(win,loss,gift,init)</span></div>
-          <div class="schema-field"><span class="schema-field-name">descripcion</span><span class="schema-field-type">VARCHAR(120)</span></div>
-          <div class="schema-field"><span class="schema-field-name">creado_at</span><span class="schema-field-type">TIMESTAMP</span></div>
-        </div>
-        <div class="schema-table">
-          <div class="schema-table-header">mensajes_chat</div>
-          <div class="schema-field"><span class="schema-field-name">id</span><span><span class="schema-field-pk">PK</span> <span class="schema-field-type">INT AUTO_INCREMENT</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">sala_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → salas</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">usuario_id</span><span><span class="schema-field-pk">FK</span> <span class="schema-field-type">INT → usuarios</span></span></div>
-          <div class="schema-field"><span class="schema-field-name">mensaje</span><span class="schema-field-type">VARCHAR(300)</span></div>
-          <div class="schema-field"><span class="schema-field-name">enviado_at</span><span class="schema-field-type">TIMESTAMP</span></div>
-        </div>
       </div>
     </div>
   </section>
