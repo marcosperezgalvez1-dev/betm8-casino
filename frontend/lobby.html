@@ -309,6 +309,7 @@
           <label class="form-label">Contraseña de la sala</label>
           <input type="password" class="form-control" id="modal-pass" placeholder="Introduce la contraseña">
         </div>
+        <div id="modal-pass-error" style="display:none;color:var(--neon-red);font-size:0.83rem;margin-top:6px;padding:8px 10px;background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.2);border-radius:var(--radius-sm)"></div>
       </div>
 
       <div id="modal-info" style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.85rem;color:var(--text-secondary)"></div>
@@ -431,13 +432,15 @@
       const fichas = room.fichas_inicio || room.startingCoins || 1000;
       const host = room.host_username || room.host;
       const esPrivada = tipo === 'privada' || tipo === 'private';
+      const tienePassword = room.has_password || !!room.password;
 
       document.getElementById('modal-icon').textContent = gameIcons[juego] || '🎮';
       document.getElementById('modal-title').textContent = nombre;
       document.getElementById('modal-subtitle').textContent =
         (esPrivada ? '🔒 Sala privada · ' : 'Sala pública · ') + gameLabels[juego];
-      document.getElementById('modal-pass-wrap').style.display = esPrivada ? 'block' : 'none';
+      document.getElementById('modal-pass-wrap').style.display = tienePassword ? 'block' : 'none';
       document.getElementById('modal-pass').value = '';
+      document.getElementById('modal-pass-error').style.display = 'none';
 
       const numJugadores = room.jugadores_actuales || jugadores.length;
       const full = numJugadores >= maxJugadores;
@@ -478,10 +481,18 @@
 
     async function confirmJoin() {
       if (!selectedRoom) return;
+      const tienePassword = selectedRoom.has_password || !!selectedRoom.password;
       const pass = document.getElementById('modal-pass').value;
+      const errEl = document.getElementById('modal-pass-error');
+      errEl.style.display = 'none';
 
-      // Intentamos API, si falla usamos localStorage
-      const result = await BetM8.joinRoom(selectedRoom.id, pass);
+      if (tienePassword && !pass.trim()) {
+        errEl.textContent = 'Debes introducir la contraseña de la sala';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const result = await BetM8.joinRoom(selectedRoom.id, pass || null);
 
       if (result.ok) {
         BetM8.toast('Te has unido a ' + (selectedRoom.nombre || selectedRoom.name), 'success');
@@ -492,7 +503,13 @@
           window.location.href = (gamePages[juego] || 'gestion-sala.html') + '?room=' + selectedRoom.id;
         }, 500);
       } else {
-        BetM8.toast(result.error || result.msg || 'Error al unirse', 'error');
+        const msg = result.error || result.msg || 'Error al unirse';
+        if (tienePassword) {
+          errEl.textContent = msg;
+          errEl.style.display = 'block';
+        } else {
+          BetM8.toast(msg, 'error');
+        }
       }
     }
 

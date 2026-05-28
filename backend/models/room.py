@@ -143,7 +143,8 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
         for sala in salas:
             if sala.get("created_at"):
                 sala["created_at"] = str(sala["created_at"])
-            # No enviar la contraseña hasheada al frontend
+            # Indicar si tiene contraseña, sin enviar el hash
+            sala["has_password"] = bool(sala.get("password"))
             sala.pop("password", None)
 
         return salas
@@ -183,7 +184,8 @@ def obtener_sala(sala_id):
         # Convertir fecha a string
         if sala.get("created_at"):
             sala["created_at"] = str(sala["created_at"])
-        # No enviar la contraseña hasheada
+        # Indicar si tiene contraseña, sin enviar el hash
+        sala["has_password"] = bool(sala.get("password"))
         sala.pop("password", None)
 
         # Obtener la lista de jugadores activos en la sala
@@ -235,6 +237,7 @@ def obtener_sala_por_codigo(codigo):
         if sala:
             if sala.get("created_at"):
                 sala["created_at"] = str(sala["created_at"])
+            sala["has_password"] = bool(sala.get("password"))
             sala.pop("password", None)
 
         return sala
