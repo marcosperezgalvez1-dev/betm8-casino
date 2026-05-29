@@ -329,6 +329,7 @@ function renderAll() {
   `).join('');
 
   document.getElementById('hand-rank').textContent = evalHand([...playerHand, ...community]);
+  updateActionButtons();
 }
 
 function evalHand(cards) {
@@ -361,10 +362,27 @@ function newHand() {
   renderAll();
 }
 
+function updateActionButtons() {
+  const checkBtn = document.getElementById('check-btn');
+  const callBtn = document.getElementById('call-btn');
+  if (currentBet > 0) {
+    checkBtn.disabled = true;
+    checkBtn.style.opacity = '0.4';
+    callBtn.textContent = 'Call ◈' + currentBet;
+  } else {
+    checkBtn.disabled = false;
+    checkBtn.style.opacity = '1';
+    callBtn.textContent = 'Call';
+  }
+}
+
 function action(type) {
   const ra = parseInt(document.getElementById('raise-amount').value) || 50;
   if (type === 'fold') { addLog('Te has retirado'); BetM8.toast('Te has retirado','info'); aiTurn(); return; }
-  if (type === 'check') { addLog('Has hecho check'); aiTurn(); return; }
+  if (type === 'check') {
+    if (currentBet > 0) { BetM8.toast('No puedes hacer check, hay una apuesta activa','warning'); return; }
+    addLog('Has hecho check'); aiTurn(); return;
+  }
   if (type === 'call') {
     if (currentBet > balance) { BetM8.toast('Fichas insuficientes','warning'); return; }
     balance -= currentBet; pot += currentBet;
@@ -403,9 +421,9 @@ function aiTurn() {
 }
 
 function advancePhase() {
-  if (phase === 'Pre-flop') { community.push(draw(),draw(),draw()); phase = 'Flop'; addLog('Flop revelado'); }
-  else if (phase === 'Flop') { community.push(draw()); phase = 'Turn'; addLog('Turn revelado'); }
-  else if (phase === 'Turn') { community.push(draw()); phase = 'River'; addLog('River revelado'); }
+  if (phase === 'Pre-flop') { community.push(draw(),draw(),draw()); phase = 'Flop'; currentBet = 0; addLog('Flop revelado'); }
+  else if (phase === 'Flop') { community.push(draw()); phase = 'Turn'; currentBet = 0; addLog('Turn revelado'); }
+  else if (phase === 'Turn') { community.push(draw()); phase = 'River'; currentBet = 0; addLog('River revelado'); }
   else if (phase === 'River') { showdown(); }
 }
 
