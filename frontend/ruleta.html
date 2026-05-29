@@ -425,6 +425,14 @@
     }
 
     let liveAnimId = null;
+    function angleToNumber(angle) {
+      let normalized = ((angle % 360) + 360) % 360;
+      let pointerAngle = (360 - normalized) % 360;
+      let idx = Math.floor(pointerAngle / SEG_DEG);
+      if (idx >= 37) idx = 0;
+      return WHEEL_ORDER[idx];
+    }
+
     function startLiveCounter() {
       const wheel = document.getElementById('wheel');
       const counter = document.getElementById('live-counter');
@@ -439,10 +447,7 @@
             angle = Math.atan2(parts[1], parts[0]) * (180 / Math.PI);
           }
         }
-        let normalized = ((angle % 360) + 360) % 360;
-        let idx = Math.floor(normalized / SEG_DEG);
-        if (idx >= 37) idx = 36;
-        const num = WHEEL_ORDER[idx];
+        const num = angleToNumber(angle);
         counter.textContent = num;
         const bg = colorOf(num) === 'red' ? '#c0392b' : colorOf(num) === 'green' ? '#0d6e4a' : '#1a1a1a';
         counter.style.background = bg;
@@ -579,8 +584,11 @@
       if (bets.length === 0) { BetM8.toast('Haz una apuesta primero', 'warning'); return; }
       const result = Math.floor(Math.random() * 37); // 0-36
       const idx = WHEEL_ORDER.indexOf(result);
-      const targetAngle = -(idx * SEG_DEG + SEG_DEG / 2);
-      lastWheelAngle += 360 * 5 + targetAngle;
+
+      const targetMod = ((-(idx * SEG_DEG + SEG_DEG / 2)) % 360 + 360) % 360;
+      const currentMod = ((lastWheelAngle % 360) + 360) % 360;
+      lastWheelAngle += 360 * 5 + ((targetMod - currentMod + 360) % 360);
+
       const wheel = document.getElementById('wheel');
       wheel.style.transform = `rotate(${lastWheelAngle}deg)`;
       document.getElementById('spin-btn').disabled = true;
@@ -588,6 +596,7 @@
 
       setTimeout(() => {
         stopLiveCounter();
+
         const counter = document.getElementById('live-counter');
         counter.textContent = result;
         counter.style.background = colorOf(result) === 'red' ? '#c0392b' : colorOf(result) === 'green' ? '#0d6e4a' : '#1a1a1a';
