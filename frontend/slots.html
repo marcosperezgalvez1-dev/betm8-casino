@@ -469,6 +469,7 @@ async function saveBalance() {
   if (!user) return;
   user.coins = balance;
   BetM8.setUser(user);
+  BetM8.syncCoinsToServer(balance);
   if (roomId) {
     const room = await BetM8.getRoom(roomId);
     if (room) {

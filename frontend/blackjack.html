@@ -703,8 +703,8 @@
       if (!user) return;
       user.coins = balance;
       BetM8.setUser(user);
+      BetM8.syncCoinsToServer(balance);
       if (roomId) {
-        // Intentamos actualizar en la API, fallback a localStorage
         const room = await BetM8.getRoom(roomId);
         if (room) {
           const jugadores = room.jugadores || room.players || [];

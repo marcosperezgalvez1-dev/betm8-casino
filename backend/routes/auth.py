@@ -6,7 +6,7 @@ Todas las rutas devuelven JSON.
 
 from flask import Blueprint, request, session
 from werkzeug.security import check_password_hash
-from models.user import crear_usuario, buscar_por_username_o_email, buscar_por_id
+from models.user import crear_usuario, buscar_por_username_o_email, buscar_por_id, establecer_coins
 from utils.helpers import respuesta_ok, respuesta_error, login_requerido
 
 # Crear el blueprint de autenticación
@@ -138,3 +138,30 @@ def me():
         return respuesta_error("Usuario no encontrado", 404)
 
     return respuesta_ok({"user": usuario})
+
+
+@auth_bp.route("/update-coins", methods=["PUT"])
+@login_requerido
+def update_coins():
+    """
+    Actualiza las fichas del usuario en la base de datos.
+    Recibe JSON: { coins }
+    Devuelve: { ok, coins }
+    """
+    datos = request.get_json()
+
+    if not datos or "coins" not in datos:
+        return respuesta_error("Debes enviar la cantidad de fichas")
+
+    coins = datos["coins"]
+
+    if not isinstance(coins, (int, float)) or coins < 0:
+        return respuesta_error("La cantidad de fichas no es válida")
+
+    user_id = session["user_id"]
+    nuevas_fichas = establecer_coins(user_id, int(coins))
+
+    if nuevas_fichas is None:
+        return respuesta_error("Error al actualizar las fichas", 500)
+
+    return respuesta_ok({"coins": nuevas_fichas})

@@ -155,3 +155,35 @@ def actualizar_coins(user_id, cantidad):
     finally:
         if conexion:
             close_db(conexion)
+
+
+def establecer_coins(user_id, coins):
+    """
+    Establece las fichas del usuario a un valor absoluto.
+    Se usa para sincronizar el balance del frontend con la base de datos.
+    Devuelve el nuevo valor de fichas o None si falla.
+    """
+    conexion = None
+    try:
+        conexion = get_db()
+        cursor = conexion.cursor()
+
+        query = """
+            UPDATE usuarios
+            SET coins = %s
+            WHERE id = %s
+            RETURNING coins
+        """
+        cursor.execute(query, (max(0, coins), user_id))
+        resultado = cursor.fetchone()
+        conexion.commit()
+
+        return resultado["coins"] if resultado else None
+
+    except Exception as e:
+        print(f"Error al establecer fichas: {e}")
+        return None
+
+    finally:
+        if conexion:
+            close_db(conexion)

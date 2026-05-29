@@ -383,6 +383,13 @@ const BetM8 = {
     return { ok: false, error: 'API no disponible' };
   },
 
+  async syncCoinsToServer(coins) {
+    /* Sincroniza las fichas del usuario con la base de datos. */
+    const resultado = await apiCall('/api/auth/update-coins', 'PUT', { coins });
+    if (resultado && resultado.ok) return resultado;
+    return null;
+  },
+
   async joinByCode(code) {
     /* Buscar una sala por código de invitación. */
     const resultado = await apiCall('/api/rooms/join-code/' + code);
