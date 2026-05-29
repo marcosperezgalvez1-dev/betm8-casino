@@ -529,6 +529,7 @@
 
     async function confirmEndGame() {
       closeEndModal();
+      if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
       const result = await BetM8.endGame(roomId);
       if (!result || !result.ok) {
         BetM8.updateRoom(room.id, { status: 'finished' });
@@ -537,7 +538,8 @@
       room.estado = 'finalizada';
       addSystemMsg('⏹ La sala ha sido finalizada por el anfitrión');
       renderAll();
-      BetM8.toast('Sala finalizada', 'info');
+      BetM8.toast('Sala finalizada — redirigiendo al lobby...', 'info');
+      setTimeout(() => { window.location.href = 'lobby.html'; }, 3000);
     }
 
     function broadcast() {
@@ -662,13 +664,20 @@
     document.getElementById('kick-modal').addEventListener('click', function(e) { if (e.target === this) closeKickModal(); });
     document.getElementById('end-modal').addEventListener('click', function(e) { if (e.target === this) closeEndModal(); });
 
+    let refreshInterval = null;
+
     document.addEventListener('DOMContentLoaded', () => {
       if (!BetM8.getUser()) { window.location.href = 'login.html'; return; }
       loadRoom();
-      // Refrescar la sala periódicamente (intentamos API)
-      setInterval(async () => {
+      refreshInterval = setInterval(async () => {
         const updated = await BetM8.getRoom(roomId);
-        if (updated) { room = updated; renderAll(); }
+        if (updated) {
+          const estado = updated.estado || updated.status;
+          if (estado === 'finalizada' || estado === 'finished') {
+            clearInterval(refreshInterval); refreshInterval = null;
+          }
+          room = updated; renderAll();
+        }
       }, 5000);
     });
   </script>
