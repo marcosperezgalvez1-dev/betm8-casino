@@ -177,6 +177,7 @@
       cursor: pointer;
       text-align: center;
       transition: background 0.15s;
+      position: relative;
     }
     .board-bet-btn:hover { background: var(--gold-glow); }
     .board-bet-btn .ratio { display:block; font-size:0.65rem; color: var(--text-muted); font-weight: 400; }
@@ -546,11 +547,18 @@
       updateBalance();
       bets.push({ type, target, amount: activeChip, payout });
 
-      // Visual chip
-      const chip = document.createElement('div');
-      chip.className = 'chip-on-cell';
-      chip.textContent = activeChip;
-      el.appendChild(chip);
+      const existing = el.querySelector('.chip-on-cell');
+      if (existing) {
+        const key = type + (target !== null ? ':' + target : '');
+        const total = bets.filter(b => (b.type + (b.target !== null ? ':' + b.target : '')) === key)
+                         .reduce((s, b) => s + b.amount, 0);
+        existing.textContent = total;
+      } else {
+        const chip = document.createElement('div');
+        chip.className = 'chip-on-cell';
+        chip.textContent = activeChip;
+        el.appendChild(chip);
+      }
 
       updateBetTotals();
     }
