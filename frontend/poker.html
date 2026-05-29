@@ -410,11 +410,33 @@ function aiTurn() {
   setTimeout(() => {
     players.forEach(p => {
       if (p.folded) return;
+      if (p.coins <= 0) { p.folded = true; addLog(p.name + ' se retira (sin fichas)'); return; }
       const r = Math.random();
-      if (r < 0.15) { p.folded = true; addLog(p.name + ' se retira'); }
-      else if (r < 0.7) { const c = Math.min(p.coins, currentBet); p.coins -= c; pot += c; p.bet += c; addLog(p.name + ' iguala'); }
-      else { const raise = Math.min(p.coins, currentBet*2); p.coins -= raise; pot += raise; p.bet += raise; currentBet = raise; addLog(p.name + ' sube a ◈' + raise); }
+      if (r < 0.15) {
+        p.folded = true; addLog(p.name + ' se retira');
+      } else if (r < 0.7) {
+        const c = Math.min(p.coins, currentBet);
+        p.coins -= c; pot += c; p.bet += c;
+        addLog(p.name + ' iguala');
+      } else {
+        const raise = Math.min(p.coins, currentBet * 2);
+        p.coins -= raise; pot += raise; p.bet += raise;
+        currentBet = raise;
+        addLog(p.name + ' sube a ◈' + raise);
+      }
     });
+    const activos = players.filter(p => !p.folded);
+    if (activos.length === 0) {
+      balance += pot;
+      addLog('Todos se retiran — ¡ganas el bote de ◈' + pot + '!');
+      BetM8.toast('¡Ganas ◈' + pot + '!', 'success');
+      pot = 0;
+      updateBalance();
+      saveBalance();
+      renderAll();
+      setTimeout(newHand, 2500);
+      return;
+    }
     advancePhase();
     renderAll();
   }, 600);
