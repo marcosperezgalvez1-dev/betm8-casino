@@ -567,8 +567,38 @@
       renderHands(true);
       setPhaseUI('play');
 
+      const dealerVisible = cardValue(dealerHand[0]);
+      if (dealerVisible === 10 || dealerVisible === 11) {
+        if (handTotal(dealerHand) === 21) {
+          renderHands(false);
+          setPhaseUI('result');
+          const playerBj = handTotal(playerHand) === 21 && playerHand.length === 2;
+          const banner = document.getElementById('result-banner');
+          const title = document.getElementById('result-title');
+          const delta = document.getElementById('result-delta');
+          if (playerBj) {
+            balance += bet;
+            title.textContent = '¡Blackjack del crupier! — Empate';
+            title.className = 'result-title push';
+            delta.textContent = 'Empate';
+            delta.style.color = 'var(--gold)';
+            addHistory('push', 21, 21, 0);
+          } else {
+            title.textContent = '¡Blackjack del crupier!';
+            title.className = 'result-title lose';
+            delta.textContent = '-◈ ' + bet.toLocaleString('es-ES');
+            delta.style.color = 'var(--neon-red)';
+            addHistory('lose', handTotal(playerHand), 21, -bet);
+          }
+          updateBalanceDisplay();
+          saveBalance();
+          banner.classList.add('show');
+          return;
+        }
+      }
+
       if (handTotal(playerHand) === 21) {
-        stand(); // Auto-resolve blackjack
+        stand();
       }
     }
 
