@@ -517,7 +517,7 @@
       const result = await BetM8.createRoom({
         nombre: name,
         juego: selectedGame,
-        tipo: selectedType === 'public' ? 'publica' : 'privada',
+        tipo: selectedType === 'public' ? 'publica' : selectedType === 'private' ? 'privada' : 'password',
         password,
         max_jugadores: parseInt(document.getElementById('room-maxplayers').value),
         fichas_inicio: parseInt(document.getElementById('coins-slider').value),

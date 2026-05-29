@@ -36,9 +36,9 @@ def crear_sala(nombre, juego, host_id, tipo="publica", password=None,
         # Generar código de invitación único
         codigo_inv = generar_codigo_invitacion()
 
-        # Si la sala es privada y tiene contraseña, hashearla
+        # Si la sala tiene contraseña (tipo 'privada' o 'password'), hashearla
         password_hash = None
-        if tipo == "privada" and password:
+        if password and tipo in ("privada", "password"):
             password_hash = generate_password_hash(password)
 
         # Insertar la sala en la base de datos
@@ -127,8 +127,11 @@ def listar_salas(filtro_juego=None, filtro_tipo=None, filtro_estado=None, busque
             parametros.append(filtro_estado)
 
         if busqueda:
-            condiciones.append("s.nombre ILIKE %s")
+            condiciones.append("(s.nombre ILIKE %s OR u.username ILIKE %s)")
             parametros.append(f"%{busqueda}%")
+            parametros.append(f"%{busqueda}%")
+
+        condiciones.append("s.tipo != 'privada'")
 
         # Añadir las condiciones al query si hay alguna
         if condiciones:
@@ -274,8 +277,8 @@ def unirse_sala(sala_id, usuario_id, password=None):
         if sala["estado"] == "finalizada":
             return False, "La sala ya ha finalizado"
 
-        # Verificar contraseña si es privada
-        if sala["tipo"] == "privada" and sala["password"]:
+        # Verificar contraseña si la sala la requiere (tipo 'privada' o 'password')
+        if sala["tipo"] in ("privada", "password") and sala["password"]:
             if not password:
                 return False, "Esta sala requiere contraseña"
             if not check_password_hash(sala["password"], password):

@@ -316,6 +316,17 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="end-modal">
+    <div class="modal">
+      <h2>Finalizar sala</h2>
+      <p>¿Estás seguro de que quieres finalizar y cerrar la sala? Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeEndModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmEndGame()">Finalizar sala</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -508,8 +519,16 @@
       BetM8.toast('Partida pausada', 'warning');
     }
 
-    async function endGame() {
-      if (!confirm('¿Finalizar y cerrar la sala?')) return;
+    function endGame() {
+      document.getElementById('end-modal').classList.add('open');
+    }
+
+    function closeEndModal() {
+      document.getElementById('end-modal').classList.remove('open');
+    }
+
+    async function confirmEndGame() {
+      closeEndModal();
       const result = await BetM8.endGame(roomId);
       if (!result || !result.ok) {
         BetM8.updateRoom(room.id, { status: 'finished' });
@@ -641,6 +660,7 @@
 
     document.getElementById('coins-modal').addEventListener('click', function(e) { if (e.target === this) closeCoinsModal(); });
     document.getElementById('kick-modal').addEventListener('click', function(e) { if (e.target === this) closeKickModal(); });
+    document.getElementById('end-modal').addEventListener('click', function(e) { if (e.target === this) closeEndModal(); });
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!BetM8.getUser()) { window.location.href = 'login.html'; return; }

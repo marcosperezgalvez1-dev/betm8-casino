@@ -259,8 +259,15 @@ const BetM8 = {
       return resultado.rooms;
     }
 
-    // Fallback a localStorage
-    return this.getRooms();
+    // Fallback a localStorage — excluir salas privadas (solo accesibles por código)
+    let rooms = this.getRooms();
+    rooms = rooms.filter(r => {
+      const tipo = r.tipo || r.type;
+      return tipo !== 'privada' && tipo !== 'private';
+    });
+    if (filters.game) rooms = rooms.filter(r => (r.juego || r.game) === filters.game);
+    if (filters.status) rooms = rooms.filter(r => (r.estado || r.status) === filters.status);
+    return rooms;
   },
 
   async createRoom(data) {
@@ -412,6 +419,8 @@ const BetM8 = {
       max_jugadores: data.max_jugadores || data.maxPlayers || 8,
       fichas_inicio: data.fichas_inicio || data.startingCoins || 1000,
       tipo: data.tipo || data.type || 'publica',
+      password: data.password || null,
+      has_password: !!(data.password),
       created_at: new Date().toISOString(),
       estado: 'esperando',
       codigo_inv: Math.random().toString(36).substring(2, 8).toUpperCase(),

@@ -80,9 +80,9 @@ def crear():
     if fichas_inicio < 10 or fichas_inicio > 10000:
         return respuesta_error("Las fichas iniciales deben ser entre 10 y 10000")
 
-    # Si es privada, necesita contraseña
-    if tipo == "privada" and not password:
-        return respuesta_error("Las salas privadas necesitan contraseña")
+    # Si es tipo 'password', necesita contraseña
+    if tipo == "password" and not password:
+        return respuesta_error("Las salas con contraseña necesitan una clave")
 
     # Obtener el ID del usuario logueado (será el host)
     host_id = session["user_id"]

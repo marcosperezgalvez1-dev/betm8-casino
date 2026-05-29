@@ -346,11 +346,20 @@
       let rooms = await BetM8.getRoomsFromAPI({ game, status, search });
       if (!rooms) rooms = BetM8.getRooms();
 
+      // Filtrar por búsqueda en el frontend (necesario para fallback localStorage)
+      if (search) {
+        rooms = rooms.filter(r => {
+          const nombre = (r.nombre || r.name || '').toLowerCase();
+          const host = (r.host_username || r.host || '').toLowerCase();
+          return nombre.includes(search) || host.includes(search);
+        });
+      }
+
       // Filtrar por tipo (público/privado) en el frontend
       rooms = rooms.filter(r => {
         const tipo = r.tipo || r.type;
         if (typeFilter === 'public' && tipo !== 'publica' && tipo !== 'public') return false;
-        if (typeFilter === 'private' && tipo !== 'privada' && tipo !== 'private') return false;
+        if (typeFilter === 'private' && tipo !== 'privada' && tipo !== 'private' && tipo !== 'password') return false;
         return true;
       });
 
@@ -384,6 +393,8 @@
           : '<span class="badge badge-green">Esperando</span>';
         const typeBadge = tipo === 'privada' || tipo === 'private'
           ? '<span class="badge badge-purple">🔒 Privada</span>'
+          : tipo === 'password'
+          ? '<span class="badge badge-gold">🔑 Contraseña</span>'
           : '<span class="badge badge-blue">Pública</span>';
         const tournBadge = r.es_torneo || r.isTournament ? '<span class="badge badge-gold">Torneo</span>' : '';
 
@@ -432,12 +443,13 @@
       const fichas = room.fichas_inicio || room.startingCoins || 1000;
       const host = room.host_username || room.host;
       const esPrivada = tipo === 'privada' || tipo === 'private';
-      const tienePassword = room.has_password || !!room.password;
+      const esPassword = tipo === 'password';
+      const tienePassword = esPassword || room.has_password || !!room.password;
 
       document.getElementById('modal-icon').textContent = gameIcons[juego] || '🎮';
       document.getElementById('modal-title').textContent = nombre;
       document.getElementById('modal-subtitle').textContent =
-        (esPrivada ? '🔒 Sala privada · ' : 'Sala pública · ') + gameLabels[juego];
+        (esPrivada ? '🔒 Sala privada · ' : esPassword ? '🔑 Con contraseña · ' : 'Sala pública · ') + gameLabels[juego];
       document.getElementById('modal-pass-wrap').style.display = tienePassword ? 'block' : 'none';
       document.getElementById('modal-pass').value = '';
       document.getElementById('modal-pass-error').style.display = 'none';
