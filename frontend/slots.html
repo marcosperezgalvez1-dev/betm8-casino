@@ -289,7 +289,7 @@ body { background:#0f0815; }
 <div class="bet-controls">
 <div class="bet-display-slots">
 <button class="bet-step-btn" onclick="changeBet(-10)">−</button>
-APUESTA: ◈ <input type="number" class="bet-input" id="bet-input" value="10" min="10" max="1000" step="10" onchange="onBetInput()">
+APUESTA: ◈ <input type="number" class="bet-input" id="bet-input" value="10" min="10" max="1000" step="10" oninput="onBetInput()" onchange="onBetInput()">
 <button class="bet-step-btn" onclick="changeBet(10)">+</button>
 </div>
 <button class="spin-btn-big" id="spin-btn" onclick="spinReels()">GIRAR</button>
@@ -394,11 +394,14 @@ function updateBalance() {
 }
 
 function spinReels() {
+  onBetInput();
   if (bet > balance) { BetM8.toast('Fichas insuficientes', 'warning'); return; }
+  if (balance <= 0) { BetM8.toast('No te quedan fichas', 'warning'); return; }
   balance -= bet;
   jackpot += Math.floor(bet * 0.1);
   document.getElementById('jackpot-amount').textContent = jackpot.toLocaleString('es-ES');
   updateBalance();
+  saveBalance();
   document.getElementById('spin-btn').disabled = true;
 
   const result = [SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)], SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)], SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]];
