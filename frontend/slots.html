@@ -428,6 +428,7 @@ function spinReels() {
 }
 
 function resolveSpin(result) {
+  bet = parseInt(document.getElementById('bet-input').value, 10) || 10;
   let win = 0, label = '';
   if (result[0] === result[1] && result[1] === result[2]) {
     if (result[0] === '7️⃣') {
@@ -443,6 +444,7 @@ function resolveSpin(result) {
     label = 'Doble';
   }
 
+  console.log('bet:', bet, 'resultado:', result, 'win:', win, 'balance antes:', balance);
   if (win > 0) {
     balance += win;
     document.getElementById('win-title').textContent = label;
